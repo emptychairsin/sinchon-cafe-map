@@ -30,7 +30,8 @@ button { font-family: inherit; }
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
 /* ---- 위 메뉴 ---- */
-.topnav { max-width: 960px; margin: 0 auto 28px; display: flex; gap: 20px; align-items: baseline; font-size: 15px; font-weight: 500; letter-spacing: .02em; }
+.topnav { max-width: 960px; margin: 0 auto 28px; display: flex; gap: 20px; align-items: baseline; font-size: 15px; font-weight: 500; letter-spacing: .02em; flex-wrap: wrap; row-gap: 8px; }
+@media (max-width: 480px) { .topnav { font-size: 13px; gap: 14px; } }
 .topnav a { color: var(--muted); text-decoration: none; }
 .topnav a[aria-current="page"] { color: var(--ink); text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1.5px; }
 .topnav .home-link { margin-right: auto; color: var(--ink); }
@@ -131,6 +132,7 @@ footer a { color: var(--muted); word-break: break-all; }
 
 .mapwrap { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 .mapwrap h1 { margin: 8px 0 0; font-size: clamp(2.4rem, 10vw, 4.4rem); font-weight: 600; letter-spacing: -0.04em; line-height: .95; }
+.mapwrap h1.long { font-size: clamp(1.9rem, 8.4vw, 4.4rem); overflow-wrap: anywhere; }
 #map { width: 100%; height: 66vh; min-height: 360px; border: 1px solid var(--ink); background: #d9d9d6; }
 .map-note, .unpinned { font-size: 13px; color: var(--muted); margin: 0; }
 .pin { width: 13px; height: 13px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); background: var(--c); }
@@ -413,7 +415,7 @@ const CAFES = [
 
 const AREAS = {
   sinchon: { name: "SHINCHON", short: "SHINCHON", center: [37.5580, 126.9380], cafe: "cafe", map: "shinchon" },
-  yy: { name: "YEONNAM&YEONHUI", short: "YEONNAM", center: [37.5650, 126.9265], cafe: "cafe-yy", map: "yeonnam" },
+  yy: { name: "YEONNAM&YEONHUI", short: "YEONNAM&YEONHUI", center: [37.5650, 126.9265], cafe: "cafe-yy", map: "yeonnam" },
 };
 let AREA = "sinchon";
 const inArea = c => (c.area || "sinchon") === AREA;
@@ -784,6 +786,7 @@ function route() {
   document.getElementById("nav-cafe").href = "#" + A.cafe;
   const nm = document.getElementById("nav-map"); nm.href = "#" + A.map; nm.textContent = A.short;
   document.getElementById("map-title").textContent = A.name;
+  document.getElementById("map-title").classList.toggle("long", A.name.length > 10);
   document.querySelectorAll("[data-nav]").forEach(a => a.dataset.nav === view ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
   document.querySelectorAll("[data-area]").forEach(a => a.dataset.area === AREA ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
   if (view === "fix") { initFix(); setTimeout(() => fixMap && fixMap.invalidateSize(), 50); }
