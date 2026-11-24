@@ -1,7 +1,6 @@
 <title>신촌 카공 지도</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
 /* Layout: 한 줄 카드 목록. 위에 필터 칩, 카드마다 혼잡도 칩 + 세 개의 공유 버튼. 형광펜 노랑이 유일한 강조색 */
 :root {
@@ -16,8 +15,8 @@
   --mid: #b7791f;  --mid-bg: #fdf1dc;
   --full: #d64545; --full-bg: #fbe6e6;
   --none-bg: #eef0f5;
-  --display: "Do Hyeon", "IBM Plex Sans KR", system-ui, sans-serif;
-  --body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --display: "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --body: "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #12162a; --surface: #1b2038; --ink: #eef0f8; --muted: #a3a9c2; --line: #2c3352;
@@ -39,7 +38,7 @@ body {
   padding-block: 20px 48px;
 }
 .wrap { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
-header h1 { font-family: var(--display); font-weight: 400; font-size: 2.3rem; line-height: 1.1; margin: 0; text-wrap: balance; }
+header h1 { font-family: var(--display); font-weight: 800; letter-spacing: -0.03em; font-size: 2.1rem; line-height: 1.15; margin: 0; text-wrap: balance; }
 header h1 .hl { background: linear-gradient(transparent 55%, var(--mark) 55%); padding: 0 2px; }
 header h1 .hl { color: inherit; }
 header p { margin: 6px 0 0; color: var(--muted); }
@@ -55,7 +54,7 @@ header p { margin: 6px 0 0; color: var(--muted); }
 .list { display: flex; flex-direction: column; gap: 14px; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
-.card h2 { font-family: var(--display); font-weight: 400; font-size: 1.5rem; margin: 0; line-height: 1.2; }
+.card h2 { font-family: var(--display); font-weight: 700; letter-spacing: -0.02em; font-size: 1.3rem; margin: 0; line-height: 1.2; }
 .addr { color: var(--muted); font-size: 13px; margin-top: 2px; }
 .status { flex-shrink: 0; border-radius: 10px; padding: 6px 10px; text-align: right; min-width: 92px; }
 .status .lv { font-weight: 700; font-size: 15px; display: block; }
@@ -112,7 +111,7 @@ footer a { color: var(--muted); word-break: break-all; }
   <footer>
     <div><b>정보 표시 방법</b> · 표시 없음: 출처에서 확인 · <span class="tag review">리뷰</span> 방문자 후기 기준 · <span class="tag guess">추정</span> 오래됐거나 불확실 · <span class="tag unknown">미확인</span> 아직 모름. 가기 전에 지도 앱에서 영업시간을 한 번 더 확인하세요.</div>
     <div>지금 버전은 내가 누른 혼잡도가 <b>이 폰(브라우저)에만</b> 저장돼요. 친구 폰에는 아직 안 보여요.</div>
-    <div>출처: <a href="https://polle.com/place/43f9BY/%EC%8B%A0%EC%B4%8C%20%EB%B8%8C%EB%A3%A8%EC%8A%A4">폴레 신촌 브루스</a> · <a href="https://polle.com/place/3fAl4k/%EB%AC%B8%20%EB%B2%A0%EC%96%B4">폴레 문 베어</a> · <a href="https://polle.com/place/5FapaF/%EB%AA%A8%EC%9D%8C">폴레 모음</a> · <a href="https://theendurer.tistory.com/entry/%EC%8B%A0%EC%B4%8C-%EB%8F%85%EC%88%98%EB%A6%AC-%EB%8B%A4%EB%B0%A9Dok-Dabang">독수리다방 블로그 후기(2023)</a> · <a href="https://polle.com/place/2oxDqq/%EC%8A%A4%ED%83%80%EB%B2%85%EC%8A%A4%20%EC%BB%A4%ED%94%BC">폴레 스타벅스 신촌점</a></div>
+    <div>출처: <a href="https://polle.com/place/43f9BY/%EC%8B%A0%EC%B4%8C%20%EB%B8%8C%EB%A3%A8%EC%8A%A4">폴레 신촌 브루스</a> · <a href="https://polle.com/place/3fAl4k/%EB%AC%B8%20%EB%B2%A0%EC%96%B4">폴레 문 베어</a> · <a href="https://polle.com/place/5FapaF/%EB%AA%A8%EC%9D%8C">폴레 모음</a> · <a href="https://theendurer.tistory.com/entry/%EC%8B%A0%EC%B4%8C-%EB%8F%85%EC%88%98%EB%A6%AC-%EB%8B%A4%EB%B0%A9Dok-Dabang">독수리다방 블로그 후기(2023)</a> · <a href="https://polle.com/place/2oxDqq/%EC%8A%A4%ED%83%80%EB%B2%85%EC%8A%A4%20%EC%BB%A4%ED%94%BC">폴레 스타벅스 신촌점</a> · <a href="https://ciee.org/go-abroad/college-study-abroad/blog/my-top-4-favorite-cafes-sinchon">CIEE 신촌 카페 후기(2023)</a> · <a href="https://www.siksinhot.com/toplists/best/112114_coffee">식신 신촌 카페 리스트(2023)</a> · <a href="https://the-edit.co.kr/40071">디에디트 기사(2021)</a></div>
   </footer>
 </div>
 <div class="toast" id="toast" hidden></div>
@@ -139,6 +138,26 @@ const CAFES = [
     plug: ["콘센트 미확인", "unknown"], quiet: ["프랜차이즈라 대화 소리 있음", "guess"],
     seats: ["1층은 좁고 2·3층이 공부하기 좋음", "review"], hours: ["평일 07:00~22:00 정도", "guess"],
     limit: "이용시간 제한 없음 (추정)", tip: "연대 근처 스타벅스가 3곳이라 사이렌오더 매장 확인", f: { plug: false, quiet: false, late: false } },
+  { id: "namu", name: "카페 나무", addr: "신촌 (정확한 주소는 지도에서 확인)", map: "https://map.naver.com/p/entry/place/1232792293",
+    plug: ["콘센트 미확인", "unknown"], quiet: ["소음 미확인", "unknown"],
+    seats: ["2층 · 라운지형 좌석 · 창가가 신촌 거리 쪽", "review"], hours: ["24시간 영업", "guess"],
+    limit: "이용시간 제한 미확인", tip: "금방 꽉 차는 편 (2023 후기)", f: { plug: false, quiet: false, late: true } },
+  { id: "place", name: "카페 플레이스", addr: "신촌 (정확한 주소는 지도에서 확인)", map: "https://map.naver.com/p/entry/place/1282200547",
+    plug: ["콘센트 미확인", "unknown"], quiet: ["1층은 대화 많음, 2층이 더 조용", "review"],
+    seats: ["1~2층 · 공부는 2층 추천", "review"], hours: ["24시간 영업", "guess"],
+    limit: "이용시간 제한 미확인", tip: "밤샘 공부 가능한 곳 (2023 후기)", f: { plug: false, quiet: false, late: true } },
+  { id: "3f", name: "3F 카페", addr: "신촌 (정확한 주소는 지도에서 확인)", map: "https://map.naver.com/p/entry/place/1006379012",
+    plug: ["콘센트 미확인", "unknown"], quiet: ["힙합 음악이 나옴", "review"],
+    seats: ["공부·과제하는 학생이 많음", "review"], hours: ["영업시간 미확인", "unknown"],
+    limit: "이용시간 제한 미확인", tip: "음악 들으며 공부하는 사람에게", f: { plug: false, quiet: false, late: false } },
+  { id: "brary", name: "카페브러리에어", addr: "신촌·이대 근처 (정확한 주소는 지도에서 확인)",
+    plug: ["콘센트 미확인", "unknown"], quiet: ["아늑하고 조용한 편", "review"],
+    seats: ["비행기 좌석형 1인 공간 · 개인 스탠드·담요·와이파이", "review"], hours: ["영업시간 미확인", "unknown"],
+    limit: "2시간 이용권(음료 무제한) · 정액권 있음 (리뷰)", tip: "일반 카페보다 스터디카페에 가까워요", f: { plug: false, quiet: true, late: false } },
+  { id: "moritz", name: "모리츠플라츠", addr: "마포구 와우산로 174, 1~2층 (신촌과 홍대 사이)",
+    plug: ["콘센트 미확인", "unknown"], quiet: ["층고 높고 넓어서 덜 북적임", "review"],
+    seats: ["좌석 많고 간격 여유 · 2층은 임스 체어", "review"], hours: ["매일 12:00~22:00 · 라스트오더 21:30", "guess"],
+    limit: "이용시간 제한 미확인", tip: "노트북 작업하는 사람 많음 (2021 기사)", f: { plug: false, quiet: false, late: false } },
 ];
 
 const LV = { free: "자리 여유", mid: "보통", full: "꽉 참" };
@@ -195,7 +214,7 @@ function render() {
     const st = r
       ? `<div class="status ${r.level}"><span class="lv">${LV[r.level]}${r.example ? '<span class="ex">예시</span>' : ""}</span><span class="ago">${ago(r.t)}</span></div>`
       : `<div class="status none"><span class="lv">정보 없음</span><span class="ago">첫 제보를 해주세요</span></div>`;
-    const mapUrl = "https://map.naver.com/p/search/" + encodeURIComponent("신촌 " + c.name.replace(" 신촌", ""));
+    const mapUrl = c.map || "https://map.naver.com/p/search/" + encodeURIComponent("신촌 " + c.name.replace(" 신촌", ""));
     return `<article class="card">
       <div class="card-top"><div><h2>${esc(c.name)}</h2><div class="addr">${esc(c.addr)}</div></div>${st}</div>
       <dl>
