@@ -102,6 +102,16 @@ footer a { color: var(--muted); word-break: break-all; }
 .tagq { font-size: 10.5px; border: 1px solid var(--line); padding: 0 4px; margin-left: 2px; }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; font-size: 14px; z-index: 1000; white-space: nowrap; }
 
+.fb { display: flex; flex-direction: column; gap: 16px; max-width: 560px; }
+.fb-kinds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.fb-kinds label { border: 1px solid var(--ink); padding: 10px 8px; font-size: 13px; font-weight: 500; text-align: center; cursor: pointer; }
+.fb-kinds input { position: absolute; opacity: 0; pointer-events: none; }
+.fb-kinds label:has(input:checked) { background: var(--ink); color: var(--bg); }
+.fb-kinds label:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; }
+.fb-field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 500; }
+.fb textarea, .fb input:not([type="radio"]) { font: inherit; font-size: 15px; border: 1px solid var(--ink); background: var(--paper); padding: 10px 12px; border-radius: 0; color: var(--ink); width: 100%; }
+.fb-send { align-self: flex-start; border: none; background: var(--ink); color: var(--bg); padding: 12px 28px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.fb-send:disabled { opacity: .5; }
 /* ---- 지도 ---- */
 .mapwrap { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 .mapwrap h1 { margin: 8px 0 0; font-size: clamp(2.4rem, 10vw, 4.4rem); font-weight: 600; letter-spacing: -0.04em; line-height: .95; }
@@ -132,6 +142,7 @@ footer a { color: var(--muted); word-break: break-all; }
   <a class="home-link" href="#">← HOME</a>
   <a href="#cafe" data-nav="cafe">CAFE</a>
   <a href="#shinchon" data-nav="shinchon">SHINCHON</a>
+  <a href="#contact" data-nav="contact">CONTACT</a>
 </nav>
 
 <section class="cafe-page" id="view-cafe" hidden>
@@ -172,6 +183,22 @@ footer a { color: var(--muted); word-break: break-all; }
   <div id="map" role="region" aria-label="신촌 카페 지도"></div>
   <p class="map-note">핀을 누르면 그 카페의 지금 자리 상태와 정보가 보여요. 거기서 바로 상태를 알려줄 수도 있어요. 핀은 주소 기준 대략적인 위치예요.</p>
   <p class="unpinned" id="unpinned"></p>
+</section>
+<section class="mapwrap" id="view-contact" hidden>
+  <h1>CONTACT</h1>
+  <p class="notice"><b>불편한 점, 바라는 점, 빠진 카페를 알려주세요.</b> 남겨주신 글은 만든 사람만 볼 수 있어요. 이름이나 연락처는 적지 않아도 돼요.</p>
+  <form id="fb-form" class="fb">
+    <div class="fb-kinds" role="radiogroup" aria-label="종류">
+      <label><input type="radio" name="kind" value="불편" checked> 불편해요</label>
+      <label><input type="radio" name="kind" value="제안"> 이런 기능 원해요</label>
+      <label><input type="radio" name="kind" value="카페 제보"> 카페 제보</label>
+      <label><input type="radio" name="kind" value="정보 수정"> 정보가 틀려요</label>
+    </div>
+    <label class="fb-field">내용<textarea id="fb-msg" name="msg" required maxlength="1000" rows="6" placeholder="예: 모음 2층은 콘센트가 거의 없어요. / 독서실 같은 카페도 넣어주세요."></textarea></label>
+    <label class="fb-field">답장 받을 인스타 아이디 (선택)<input id="fb-contact" name="contact" maxlength="60" placeholder="@아이디"></label>
+    <button type="submit" class="fb-send">보내기</button>
+    <p class="map-note" id="fb-status" aria-live="polite"></p>
+  </form>
 </section>
 <section class="mapwrap" id="view-fix" hidden>
   <h1>PIN FIX</h1>
@@ -572,14 +599,31 @@ function initFix() {
   });
   fixRender();
 }
+
+/* ---------- CONTACT ---------- */
+document.getElementById("fb-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const f = e.target, st = document.getElementById("fb-status"), btn = f.querySelector(".fb-send");
+  const msg = f.msg.value.trim();
+  if (msg.length < 2) { st.textContent = "내용을 조금만 더 적어주세요."; return; }
+  if (!SHARED) { st.textContent = "아직 보내기 기능이 연결되지 않았어요."; return; }
+  btn.disabled = true; st.textContent = "보내는 중...";
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/feedback`, { method: "POST", headers: { ...SB_HEAD, "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify({ kind: f.kind.value, message: msg, contact: f.contact.value.trim() || null }) });
+    if (!res.ok) throw new Error(res.status);
+    f.reset(); st.textContent = "보냈어요. 고마워요! 꼼꼼히 읽어볼게요.";
+  } catch (err) { st.textContent = "보내지 못했어요. 잠시 뒤 다시 눌러주세요."; }
+  btn.disabled = false;
+});
 /* ---------- 화면 전환 ---------- */
 function route() {
   const h = location.hash.replace("#", "");
-  const view = ["cafe", "shinchon", "fix"].includes(h) ? h : "home";
+  const view = ["cafe", "shinchon", "fix", "contact"].includes(h) ? h : "home";
   document.getElementById("view-home").hidden = view !== "home";
   document.getElementById("view-cafe").hidden = view !== "cafe";
   document.getElementById("view-shinchon").hidden = view !== "shinchon";
   document.getElementById("view-fix").hidden = view !== "fix";
+  document.getElementById("view-contact").hidden = view !== "contact";
   document.getElementById("topnav").hidden = view === "home";
   document.querySelectorAll("[data-nav]").forEach(a => a.dataset.nav === view ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
   if (view === "fix") { initFix(); setTimeout(() => fixMap && fixMap.invalidateSize(), 50); }
