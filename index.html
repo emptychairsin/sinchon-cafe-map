@@ -504,6 +504,18 @@ async function report(id, lv) {
 document.addEventListener("click", e => { const b = e.target.closest(".report button"); if (b) report(b.dataset.id, b.dataset.lv); });
 
 /* ---------- 지도 ---------- */
+/* 바탕 지도: 열쇠 없이 쓰는 연회색 지도. 안 뜨면 기본 OSM 지도로 바꿈 */
+function addBase(m) {
+  const base = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19, maxNativeZoom: 16, attribution: "Tiles &copy; Esri, OpenStreetMap" }).addTo(m);
+  const ref = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19, maxNativeZoom: 16 }).addTo(m);
+  let errs = 0, swapped = false;
+  base.on("tileerror", () => {
+    if (swapped || ++errs < 4) return;
+    swapped = true; m.removeLayer(base); m.removeLayer(ref);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "&copy; OpenStreetMap" }).addTo(m);
+  });
+}
+
 let map = null; const markers = {};
 function popupHtml(c) {
   const r = current(c.id);
@@ -520,7 +532,7 @@ function pinIcon(c) {
 function initMap() {
   if (map || typeof L === "undefined") return;
   map = L.map("map").setView([37.5580, 126.9380], 17);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { maxZoom: 20, subdomains: "abcd", attribution: "&copy; OpenStreetMap &copy; CARTO" }).addTo(map);
+  addBase(map);
   CAFES.filter(c => c.pos).forEach(c => { markers[c.id] = L.marker(c.pos, { icon: pinIcon(c), title: c.name }).addTo(map).bindPopup(() => popupHtml(c)); });
   const un = CAFES.filter(c => !c.pos);
   document.getElementById("unpinned").innerHTML = un.length ? "아직 정확한 위치를 몰라서 지도에 없는 곳: " + un.map(c => `<a href="${mapUrl(c)}" target="_blank" rel="noopener">${esc(c.name)}</a>`).join(", ") : "";
@@ -543,7 +555,7 @@ function fixRender() {
 function initFix() {
   if (fixMap || typeof L === "undefined") return;
   fixMap = L.map("fixmap").setView([37.5580, 126.9380], 17);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { maxZoom: 20, subdomains: "abcd", attribution: "&copy; OpenStreetMap &copy; CARTO" }).addTo(fixMap);
+  addBase(fixMap);
   CAFES.forEach((c, i) => {
     const pos = c.pos || [37.5530 - Math.floor(i / 6) * 0.0006, 126.9330 + (i % 6) * 0.0012];
     fixPos[c.id] = pos;
