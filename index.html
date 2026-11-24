@@ -73,7 +73,9 @@ button { font-family: inherit; }
 .face { position: absolute; inset: 0; background: var(--paper); border: 1px solid var(--line); backface-visibility: hidden; -webkit-backface-visibility: hidden; display: flex; flex-direction: column; padding: 16px 14px; box-shadow: 0 10px 24px rgba(0,0,0,.08); }
 .front { justify-content: space-between; cursor: pointer; }
 .front .no { font-size: 12px; color: var(--muted); letter-spacing: .08em; }
-.front .nm { font-size: 30px; font-weight: 700; letter-spacing: -0.05em; line-height: 1.05; word-break: keep-all; }
+.front .nm.long { font-size: 24px; }
+.front .nm.xlong { font-size: 21px; }
+.front .nm { overflow-wrap: anywhere; font-size: 30px; font-weight: 700; letter-spacing: -0.05em; line-height: 1.05; word-break: keep-all; }
 .front .st { font-size: 12px; display: flex; align-items: center; gap: 6px; font-weight: 500; }
 .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--c, var(--none)); flex-shrink: 0; }
 .back { transform: rotateY(180deg); gap: 7px; font-size: 12px; line-height: 1.45; overflow: hidden; }
@@ -159,7 +161,7 @@ footer a { color: var(--muted); word-break: break-all; }
   <footer>
     <div><b>정보 표시 방법:</b> 표시 없음: 출처에서 확인, <span class="tagq">리뷰</span> 방문자 후기 기준, <span class="tagq">추정</span> 오래됐거나 불확실, <span class="tagq">미확인</span> 아직 모름, <span class="tagq">제보</span> 신촌 학생 제보. 가기 전에 지도 앱에서 영업시간을 한 번 더 확인하세요.</div>
     <div id="share-note">지금 버전은 내가 누른 자리 상태가 <b>이 폰(브라우저)에만</b> 저장돼요. 친구 폰에는 아직 안 보여요.</div>
-    <div>출처: <a href="https://polle.com/place/43f9BY/%EC%8B%A0%EC%B4%8C%20%EB%B8%8C%EB%A3%A8%EC%8A%A4">폴레 신촌 브루스</a>, <a href="https://polle.com/place/3fAl4k/%EB%AC%B8%20%EB%B2%A0%EC%96%B4">폴레 문 베어</a>, <a href="https://polle.com/place/5FapaF/%EB%AA%A8%EC%9D%8C">폴레 모음</a>, <a href="https://theendurer.tistory.com/entry/%EC%8B%A0%EC%B4%8C-%EB%8F%85%EC%88%98%EB%A6%AC-%EB%8B%A4%EB%B0%A9Dok-Dabang">독수리다방 블로그 후기(2023)</a>, <a href="https://polle.com/place/2oxDqq/%EC%8A%A4%ED%83%80%EB%B2%85%EC%8A%A4%20%EC%BB%A4%ED%94%BC">폴레 스타벅스 신촌점</a>, <a href="https://ciee.org/go-abroad/college-study-abroad/blog/my-top-4-favorite-cafes-sinchon">CIEE 신촌 카페 후기(2023)</a>, <a href="https://www.siksinhot.com/toplists/best/112114_coffee">식신 신촌 카페 리스트(2023)</a>, <a href="https://the-edit.co.kr/40071">디에디트 기사(2021)</a></div>
+    <div>출처: <a href="https://polle.com/place/43f9BY/%EC%8B%A0%EC%B4%8C%20%EB%B8%8C%EB%A3%A8%EC%8A%A4">폴레 신촌 브루스</a>, <a href="https://polle.com/place/3fAl4k/%EB%AC%B8%20%EB%B2%A0%EC%96%B4">폴레 문 베어</a>, <a href="https://polle.com/place/5FapaF/%EB%AA%A8%EC%9D%8C">폴레 모음</a>, <a href="https://theendurer.tistory.com/entry/%EC%8B%A0%EC%B4%8C-%EB%8F%85%EC%88%98%EB%A6%AC-%EB%8B%A4%EB%B0%A9Dok-Dabang">독수리다방 블로그 후기(2023)</a>, <a href="https://polle.com/place/2oxDqq/%EC%8A%A4%ED%83%80%EB%B2%85%EC%8A%A4%20%EC%BB%A4%ED%94%BC">폴레 스타벅스 신촌점</a>, <a href="https://ciee.org/go-abroad/college-study-abroad/blog/my-top-4-favorite-cafes-sinchon">CIEE 신촌 카페 후기(2023)</a>, <a href="https://www.siksinhot.com/toplists/best/112114_coffee">식신 신촌 카페 리스트(2023)</a>, <a href="https://the-edit.co.kr/40071">디에디트 기사(2021)</a>, 프랜차이즈 매장 정보: <a href="https://www.diningcode.com/">다이닝코드</a></div>
   </footer>
 
 </section>
@@ -191,10 +193,10 @@ const CAFES = [
     plug: ["대부분 좌석에 있음, 없는 구역도 있음", "guess"], quiet: ["조용하고 집중하기 좋음", "guess"],
     seats: ["8층, 테라스석 많음(겨울엔 추움)", "guess"], hours: ["매일 11:00~24:00, 라스트오더 23:30", "guess"],
     limit: "이용시간 제한 미확인", tip: "2023년 후기 기준이라 바뀌었을 수 있어요", f: { plug: true, quiet: true, late: true, solo: false } },
-  { id: "sbux", pos: [37.5563, 126.9367], name: "스타벅스 신촌점", addr: "서대문구 연세로 10-1, 1~3층",
-    plug: ["콘센트 미확인", "unknown"], quiet: ["프랜차이즈라 대화 소리 있음", "guess"],
-    seats: ["1층은 좁고 2, 3층이 공부하기 좋음", "review"], hours: ["평일 07:00~22:00 정도", "guess"],
-    limit: "이용시간 제한 없음 (추정)", tip: "연대 근처 스타벅스가 3곳이라 사이렌오더 매장 확인", f: { plug: false, quiet: false, late: false, solo: false } },
+  { id: "sbux", pos: [37.5560, 126.9370], name: "스타벅스 신촌점", addr: "서대문구 연세로 10-1, 1~3층",
+    plug: ["콘센트 미확인", "unknown"], quiet: ["손님 많아 대화 소리 있음", "review"],
+    seats: ["1층은 좁고 2, 3층이 공부하기 좋음", "review"], hours: ["07:00~22:00 (요일마다 조금 다름)", "review"],
+    limit: "이용시간 제한 없음 (추정)", tip: "연대 근처 스타벅스가 여러 곳이라 사이렌오더 매장 확인", f: { plug: false, quiet: false, late: false, solo: false } },
   { id: "namu", name: "카페 나무", addr: "신촌 (정확한 주소는 지도에서 확인)", map: "https://map.naver.com/p/entry/place/1232792293",
     plug: ["콘센트 미확인", "unknown"], quiet: ["소음 미확인", "unknown"],
     seats: ["2층, 라운지형 좌석, 창가가 신촌 거리 쪽", "review"], hours: ["24시간 영업", "guess"],
@@ -227,6 +229,54 @@ const CAFES = [
     plug: ["콘센트 미확인", "unknown"], quiet: ["프랜차이즈라 대화 소리 있음", "guess"],
     seats: ["좌석 정보 미확인", "unknown"], hours: ["밤 10시 이후에도 영업", "tip"],
     limit: "이용시간 제한 없음 (추정)", tip: "늦게까지 여는 곳", f: { plug: false, quiet: false, late: true, solo: false } },
+  { id: "sbux-yonsei", pos: [37.558, 126.9365], name: "스타벅스 연대점", addr: "서대문구 연세로 35",
+    plug: ["콘센트 미확인", "unknown"], quiet: ["프랜차이즈라 대화 소리 있음", "guess"],
+    seats: ["좌석은 2층부터, 3, 4층까지 있음", "review"], hours: ["평일 08:00~20:00, 주말 09:00~20:00", "review"],
+    limit: "이용시간 제한 없음 (추정)", tip: "좌석 층이 많아서 넓은 편", f: { plug: false, quiet: false, late: false, solo: false } },
+  { id: "sbux-myeongmul", pos: [37.5569, 126.9376], name: "스타벅스 신촌명물거리점", addr: "서대문구 명물길 24",
+    plug: ["콘센트 미확인", "unknown"], quiet: ["프랜차이즈라 대화 소리 있음", "guess"],
+    seats: ["좌석 정보 미확인", "unknown"], hours: ["매일 09:00~21:00", "review"],
+    limit: "이용시간 제한 없음 (추정)", tip: "명물거리 한가운데", f: { plug: false, quiet: false, late: false, solo: false } },
+  { id: "sbux-sinchonro", name: "스타벅스 신촌로점", addr: "서대문구 신촌로 109",
+    plug: ["콘센트 미확인", "unknown"], quiet: ["프랜차이즈라 대화 소리 있음", "guess"],
+    seats: ["작은 매장, 좌석 적음", "review"], hours: ["평일 07:00~22:00, 주말 ~21:00", "review"],
+    limit: "이용시간 제한 없음 (추정)", tip: "테이크아웃 위주로 생각하기", f: { plug: false, quiet: false, late: false, solo: false } },
+  { id: "sbux-station", name: "스타벅스 신촌역점", addr: "서대문구 신촌로 73, 1~2층",
+    plug: ["콘센트 미확인", "unknown"], quiet: ["프랜차이즈라 대화 소리 있음", "guess"],
+    seats: ["1층 주문, 2층에 좌석 많음", "review"], hours: ["평일 07:00~21:00, 주말 ~20:00", "review"],
+    limit: "이용시간 제한 없음 (추정)", tip: "2층이 넓어요", f: { plug: false, quiet: false, late: false, solo: false } },
+  { id: "sbux-hyundai", name: "스타벅스 현대신촌점", addr: "서대문구 신촌로 83 현대백화점 지하",
+    plug: ["콘센트 미확인", "unknown"], quiet: ["프랜차이즈라 대화 소리 있음", "guess"],
+    seats: ["백화점 지하 매장", "review"], hours: ["10:30~22:00", "review"],
+    limit: "이용시간 제한 없음 (추정)", tip: "백화점 영업시간에 맞춰 열어요", f: { plug: false, quiet: false, late: false, solo: false } },
+  { id: "sbux-ogeori", name: "스타벅스 신촌오거리점", addr: "마포구 신촌로16길 10",
+    plug: ["콘센트 미확인", "unknown"], quiet: ["프랜차이즈라 대화 소리 있음", "guess"],
+    seats: ["2층 좌석", "review"], hours: ["07:00~22:00 정도", "guess"],
+    limit: "이용시간 제한 없음 (추정)", tip: "프랜차이즈 매장", f: { plug: false, quiet: false, late: false, solo: false } },
+  { id: "sbux-sogang", name: "스타벅스 서강대점", addr: "마포구 백범로 23 1층",
+    plug: ["콘센트 미확인", "unknown"], quiet: ["프랜차이즈라 대화 소리 있음", "guess"],
+    seats: ["좌석 정보 미확인", "unknown"], hours: ["평일 07:00~22:00, 일 08:00~19:00", "review"],
+    limit: "이용시간 제한 없음 (추정)", tip: "서강대 쪽에서 가까워요", f: { plug: false, quiet: false, late: false, solo: false } },
+  { id: "twosome-yonseiro", pos: [37.5574, 126.9372], name: "투썸플레이스 신촌연세로점", addr: "서대문구 연세로 28",
+    plug: ["콘센트 미확인", "unknown"], quiet: ["프랜차이즈라 대화 소리 있음", "guess"],
+    seats: ["1층 주문, 3층까지 좌석", "review"], hours: ["08:00~24:00 (24시간이라는 정보도 있음)", "guess"],
+    limit: "이용시간 제한 없음 (추정)", tip: "늦게까지 공부할 때", f: { plug: false, quiet: false, late: true, solo: false } },
+  { id: "twosome-nogosan", name: "투썸플레이스 마포노고산점", addr: "마포구 신촌로 128, 1층",
+    plug: ["있음", "review"], quiet: ["프랜차이즈라 대화 소리 있음", "guess"],
+    seats: ["좌석 많고 노트북 손님 많음", "review"], hours: ["매일 08:00~22:00", "review"],
+    limit: "이용시간 제한 없음 (추정)", tip: "콘센트 있다는 후기 있음", f: { plug: false, quiet: false, late: false, solo: false } },
+  { id: "twosome-daero", name: "투썸플레이스 신촌대로점", addr: "마포구 신촌로 74, 2층",
+    plug: ["콘센트 미확인", "unknown"], quiet: ["프랜차이즈라 대화 소리 있음", "guess"],
+    seats: ["좌석 정보 미확인", "unknown"], hours: ["매일 08:00~22:00", "review"],
+    limit: "이용시간 제한 없음 (추정)", tip: "프랜차이즈 매장", f: { plug: false, quiet: false, late: false, solo: false } },
+  { id: "twosome-train", name: "투썸플레이스 신촌기차역점", addr: "서대문구 신촌역로 31",
+    plug: ["콘센트 미확인", "unknown"], quiet: ["프랜차이즈라 대화 소리 있음", "guess"],
+    seats: ["개인실 있다는 정보 있음", "review"], hours: ["매일 10:30~23:30", "review"],
+    limit: "이용시간 제한 없음 (추정)", tip: "밤 11시 반까지 열어요", f: { plug: false, quiet: false, late: true, solo: false } },
+  { id: "hollys-sinchon", pos: [37.558, 126.9372], name: "할리스 신촌점", addr: "서대문구 연세로 34, 1~3층",
+    plug: ["콘센트 미확인", "unknown"], quiet: ["2층은 조용, 3층은 활기참", "review"],
+    seats: ["2층은 조용하고 3층은 북적이는 편", "review"], hours: ["매일 09:00~23:00", "review"],
+    limit: "이용시간 제한 없음 (추정)", tip: "조용히 하려면 2층", f: { plug: false, quiet: false, late: true, solo: false } },
 ];
 
 const LV = { free: "자리 여유", mid: "보통", full: "꽉 참" };
@@ -301,7 +351,7 @@ function passes(c) {
 function frontHtml(c, i) {
   const r = current(c.id);
   return `<div class="face front"><span class="no">NO. ${String(CAFES.indexOf(c) + 1).padStart(2, "0")}</span>
-    <span class="nm">${esc(c.name)}</span>
+    <span class="nm${c.name.length > 11 ? " xlong" : c.name.length > 5 ? " long" : ""}">${esc(c.name)}</span>
     <span class="st"><i class="dot" style="--c:${COL[r ? r.level : "none"]}"></i>${r ? LV[r.level] : "정보 없음"}</span></div>`;
 }
 function backHtml(c) {
