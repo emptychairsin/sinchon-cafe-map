@@ -135,9 +135,13 @@ footer a { color: var(--muted); word-break: break-all; }
 .mapwrap h1.long { font-size: clamp(1.9rem, 8.4vw, 4.4rem); overflow-wrap: anywhere; }
 #map { width: 100%; height: 66vh; min-height: 360px; border: 1px solid var(--ink); background: #d9d9d6; }
 .map-note, .unpinned { font-size: 13px; color: var(--muted); margin: 0; }
-.pin { width: 13px; height: 13px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); background: var(--c); }
+.pin { width: 20px; height: 20px; border-radius: 50%; border: 3px solid #111; box-shadow: 0 0 0 2px #fff, 0 2px 6px rgba(0,0,0,.45); background: var(--c); position: relative; }
+.pin .pin-lb { position: absolute; left: 50%; top: 24px; transform: translateX(-50%); white-space: nowrap; background: #111; color: #fff; font-size: 11px; font-weight: 600; line-height: 1; padding: 4px 6px; pointer-events: none; }
 .pin-wrap { background: none; border: none; }
 .pin.auto { border-style: dashed; }
+.pin:hover { z-index: 3; }
+#map:not(.labels) .pin-lb { display: none; }
+#map .pin:hover .pin-lb { display: block; }
 .auto-note { font-size: 11px; color: var(--muted); margin-top: 6px; }
 .gray-tiles { filter: grayscale(1) contrast(.85) brightness(1.08); }
 .leaflet-popup-content-wrapper { border-radius: 0; }
@@ -277,10 +281,6 @@ const CAFES = [
     plug: ["콘센트 미확인", "unknown"], quiet: ["힙합 음악이 나옴", "review"],
     seats: ["공부와 과제하는 학생이 많음", "review"], hours: ["영업시간 미확인", "unknown"],
     limit: "이용시간 제한 미확인", tip: "음악 들으며 공부하는 사람에게", f: { plug: false, quiet: false, late: false, solo: false } },
-  { id: "brary", name: "카페브러리에어", addr: "신촌, 이대 근처 (정확한 주소는 지도에서 확인)",
-    plug: ["콘센트 미확인", "unknown"], quiet: ["아늑하고 조용한 편", "review"],
-    seats: ["비행기 좌석형 1인 공간, 개인 스탠드, 담요, 와이파이", "review"], hours: ["영업시간 미확인", "unknown"],
-    limit: "2시간 이용권(음료 무제한), 정액권 있음 (리뷰)", tip: "일반 카페보다 스터디카페에 가까워요", f: { plug: false, quiet: true, late: false, solo: true } },
   { id: "moritz", name: "모리츠플라츠", addr: "마포구 와우산로 174, 1~2층 (신촌과 홍대 사이)",
     plug: ["콘센트 미확인", "unknown"], quiet: ["층고 높고 넓어서 덜 북적임", "review"],
     seats: ["좌석 많고 간격 여유, 2층은 임스 체어", "review"], hours: ["매일 12:00~22:00, 라스트오더 21:30", "guess"],
@@ -634,7 +634,7 @@ function popupHtml(c) {
 }
 function pinIcon(c) {
   const r = current(c.id);
-  return L.divIcon({ className: "pin-wrap", html: `<div class="pin" style="--c:${COL[r ? r.level : "none"]}"></div>`, iconSize: [13, 13], iconAnchor: [6, 6], popupAnchor: [0, -6] });
+  return L.divIcon({ className: "pin-wrap", html: `<div class="pin" style="--c:${COL[r ? r.level : "none"]}"><span class="pin-lb">${esc(c.name)}</span></div>`, iconSize: [26, 26], iconAnchor: [13, 13], popupAnchor: [0, -12] });
 }
 const KAKAO_KEY = "fb4eb23e3d4873f92cb218936e69e315";
 let mapKind = null, kInfo = null; const kPins = {};
@@ -646,6 +646,8 @@ function initLeaflet() {
   if (map || typeof L === "undefined") return;
   mapKind = "leaflet";
   map = L.map("map").setView(AREAS[AREA].center, 16); mapArea = AREA;
+  const lab = () => document.getElementById("map").classList.toggle("labels", map.getZoom() >= 18);
+  map.on("zoomend", lab); lab();
   addBase(map);
   CAFES.filter(c => c.pos && inArea(c)).forEach(c => { markers[c.id] = L.marker(c.pos, { icon: pinIcon(c), title: c.name }).addTo(map).bindPopup(() => popupHtml(c)); });
 }
@@ -656,9 +658,11 @@ function initKakao() {
   map.addControl(new km.ZoomControl(), km.ControlPosition.RIGHT);
   kInfo = new km.CustomOverlay({ yAnchor: 1.15, zIndex: 10 });
   km.event.addListener(map, "click", () => { kInfo.setMap(null); kInfo._id = null; });
+  const lab = () => document.getElementById("map").classList.toggle("labels", map.getLevel() <= 2);
+  km.event.addListener(map, "zoom_changed", lab); lab();
   CAFES.filter(c => c.pos && inArea(c)).forEach(c => {
     const el = document.createElement("div");
-    el.className = "pin"; el.title = c.name; el.style.cursor = "pointer";
+    el.className = "pin"; el.title = c.name; el.style.cursor = "pointer"; el.innerHTML = `<span class="pin-lb">${esc(c.name)}</span>`;
     el.addEventListener("click", ev => { ev.stopPropagation(); openKakaoInfo(c); });
     const ov = new km.CustomOverlay({ position: new km.LatLng(c.pos[0], c.pos[1]), content: el, yAnchor: 0.5, xAnchor: 0.5, zIndex: 5 });
     ov.setMap(map); kPins[c.id] = el;
@@ -668,7 +672,7 @@ function initKakao() {
 }
 function addKakaoPin(c) {
   const km = kakao.maps, el = document.createElement("div");
-  el.className = "pin" + (c.auto ? " auto" : ""); el.title = c.name; el.style.cursor = "pointer";
+  el.className = "pin" + (c.auto ? " auto" : ""); el.title = c.name; el.style.cursor = "pointer"; el.innerHTML = `<span class="pin-lb">${esc(c.name)}</span>`;
   el.addEventListener("click", ev => { ev.stopPropagation(); openKakaoInfo(c); });
   new km.CustomOverlay({ position: new km.LatLng(c.pos[0], c.pos[1]), content: el, yAnchor: 0.5, xAnchor: 0.5, zIndex: 5 }).setMap(map);
   kPins[c.id] = el; paintKakaoPins();
