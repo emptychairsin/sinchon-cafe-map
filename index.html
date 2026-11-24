@@ -1,0 +1,242 @@
+<title>신촌 카공 지도</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* Layout: 한 줄 카드 목록. 위에 필터 칩, 카드마다 혼잡도 칩 + 세 개의 공유 버튼. 형광펜 노랑이 유일한 강조색 */
+:root {
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --ink: #1b2340;
+  --muted: #5f6782;
+  --line: #e1e4ee;
+  --mark: #ffe066;      /* 형광펜 */
+  --mark-ink: #1b2340;
+  --free: #1f9d61; --free-bg: #e3f6ec;
+  --mid: #b7791f;  --mid-bg: #fdf1dc;
+  --full: #d64545; --full-bg: #fbe6e6;
+  --none-bg: #eef0f5;
+  --display: "Do Hyeon", "IBM Plex Sans KR", system-ui, sans-serif;
+  --body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12162a; --surface: #1b2038; --ink: #eef0f8; --muted: #a3a9c2; --line: #2c3352;
+  --mark: #f5d547; --mark-ink: #12162a;
+  --free: #4fd18f; --free-bg: #173a2b; --mid: #f0b44c; --mid-bg: #3d2f15; --full: #ff7a7a; --full-bg: #43201f; --none-bg: #252b47;
+  color-scheme: dark;
+}}
+:root[data-theme="dark"] {
+  --bg: #12162a; --surface: #1b2038; --ink: #eef0f8; --muted: #a3a9c2; --line: #2c3352;
+  --mark: #f5d547; --mark-ink: #12162a;
+  --free: #4fd18f; --free-bg: #173a2b; --mid: #f0b44c; --mid-bg: #3d2f15; --full: #ff7a7a; --full-bg: #43201f; --none-bg: #252b47;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 48px;
+}
+.wrap { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+header h1 { font-family: var(--display); font-weight: 400; font-size: 2.3rem; line-height: 1.1; margin: 0; text-wrap: balance; }
+header h1 .hl { background: linear-gradient(transparent 55%, var(--mark) 55%); padding: 0 2px; }
+header h1 .hl { color: inherit; }
+header p { margin: 6px 0 0; color: var(--muted); }
+.notice { background: var(--surface); border: 1px dashed var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13px; color: var(--muted); }
+.notice b { color: var(--ink); }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip-btn {
+  font: inherit; font-size: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  border-radius: 999px; padding: 6px 12px; cursor: pointer;
+}
+.chip-btn[aria-pressed="true"] { background: var(--mark); color: var(--mark-ink); border-color: var(--mark); font-weight: 700; }
+.chip-btn:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.list { display: flex; flex-direction: column; gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.card h2 { font-family: var(--display); font-weight: 400; font-size: 1.5rem; margin: 0; line-height: 1.2; }
+.addr { color: var(--muted); font-size: 13px; margin-top: 2px; }
+.status { flex-shrink: 0; border-radius: 10px; padding: 6px 10px; text-align: right; min-width: 92px; }
+.status .lv { font-weight: 700; font-size: 15px; display: block; }
+.status .ago { font-size: 12px; opacity: .85; }
+.status.free { background: var(--free-bg); color: var(--free); }
+.status.mid { background: var(--mid-bg); color: var(--mid); }
+.status.full { background: var(--full-bg); color: var(--full); }
+.status.none { background: var(--none-bg); color: var(--muted); }
+.ex { display: inline-block; font-size: 11px; border: 1px solid currentColor; border-radius: 4px; padding: 0 4px; margin-left: 4px; }
+dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 14px; }
+dt { color: var(--muted); white-space: nowrap; }
+dd { margin: 0; min-width: 0; }
+.tag { font-size: 11px; border-radius: 4px; padding: 1px 5px; margin-left: 4px; white-space: nowrap; vertical-align: 1px; }
+.tag.review { background: var(--none-bg); color: var(--muted); }
+.tag.guess { background: var(--mid-bg); color: var(--mid); }
+.tag.unknown { background: var(--none-bg); color: var(--muted); }
+.report-label { font-size: 13px; color: var(--muted); margin: 0; }
+.report { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.report button { font: inherit; font-weight: 700; font-size: 14px; border-radius: 10px; padding: 10px 4px; cursor: pointer; border: 1.5px solid transparent; }
+.report .free { background: var(--free-bg); color: var(--free); }
+.report .mid { background: var(--mid-bg); color: var(--mid); }
+.report .full { background: var(--full-bg); color: var(--full); }
+.report button:active { transform: scale(.97); }
+.report button.done { border-color: currentColor; }
+.card-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; }
+.card-foot a { color: var(--ink); font-weight: 500; }
+.tip { color: var(--muted); }
+.empty { text-align: center; color: var(--muted); padding: 24px 0; }
+footer { font-size: 12.5px; color: var(--muted); display: flex; flex-direction: column; gap: 8px; }
+footer a { color: var(--muted); word-break: break-all; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 999px; font-size: 14px; }
+@media (prefers-reduced-motion: reduce) { .report button:active { transform: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1><span class="hl">신촌 카공</span> 지도</h1>
+    <p>시험기간, 가기 전에 자리부터 확인하세요. 다녀온 사람이 누르면 다음 사람이 덜 헤매요.</p>
+  </header>
+
+  <div class="notice" id="notice">
+    <b>지금 보이는 혼잡도는 예시예요.</b> 카페에 가면 버튼을 눌러 지금 상태를 알려주세요. 2시간이 지난 정보는 자동으로 사라져요.
+  </div>
+
+  <div class="filters" role="group" aria-label="필터">
+    <button class="chip-btn" id="f-seat" aria-pressed="false" data-f="seat">자리 있는 곳만</button>
+    <button class="chip-btn" id="f-plug" aria-pressed="false" data-f="plug">콘센트 많음</button>
+    <button class="chip-btn" id="f-quiet" aria-pressed="false" data-f="quiet">조용함</button>
+    <button class="chip-btn" id="f-late" aria-pressed="false" data-f="late">밤 10시 이후도</button>
+  </div>
+
+  <div class="list" id="list"></div>
+
+  <footer>
+    <div><b>정보 표시 방법</b> · 표시 없음: 출처에서 확인 · <span class="tag review">리뷰</span> 방문자 후기 기준 · <span class="tag guess">추정</span> 오래됐거나 불확실 · <span class="tag unknown">미확인</span> 아직 모름. 가기 전에 지도 앱에서 영업시간을 한 번 더 확인하세요.</div>
+    <div>지금 버전은 내가 누른 혼잡도가 <b>이 폰(브라우저)에만</b> 저장돼요. 친구 폰에는 아직 안 보여요.</div>
+    <div>출처: <a href="https://polle.com/place/43f9BY/%EC%8B%A0%EC%B4%8C%20%EB%B8%8C%EB%A3%A8%EC%8A%A4">폴레 신촌 브루스</a> · <a href="https://polle.com/place/3fAl4k/%EB%AC%B8%20%EB%B2%A0%EC%96%B4">폴레 문 베어</a> · <a href="https://polle.com/place/5FapaF/%EB%AA%A8%EC%9D%8C">폴레 모음</a> · <a href="https://theendurer.tistory.com/entry/%EC%8B%A0%EC%B4%8C-%EB%8F%85%EC%88%98%EB%A6%AC-%EB%8B%A4%EB%B0%A9Dok-Dabang">독수리다방 블로그 후기(2023)</a> · <a href="https://polle.com/place/2oxDqq/%EC%8A%A4%ED%83%80%EB%B2%85%EC%8A%A4%20%EC%BB%A4%ED%94%BC">폴레 스타벅스 신촌점</a></div>
+  </footer>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const CAFES = [
+  { id: "bruce", name: "신촌 브루스", addr: "서대문구 신촌로 87-4 4층 (엘리베이터 없음)",
+    plug: ["많음, 일부 자리는 없음", "review"], quiet: ["조용한 편, 음악은 있음", "review"],
+    seats: ["테이블 넓고 간격 넉넉 · 좌석 수 미확인", "review"], hours: ["영업시간 미확인", "unknown"],
+    limit: "4시간 이용 (리뷰)", tip: "주말보다 평일 추천", f: { plug: true, quiet: true, late: false } },
+  { id: "moonbear", name: "문 베어 신촌", addr: "서대문구 명물길 66 1층",
+    plug: ["많음", "review"], quiet: ["잔잔한 피아노 음악", "review"],
+    seats: ["독서실형 칸막이석 · 커튼 있는 창가석", "review"], hours: ["연중무휴 · 시간 미확인", "unknown"],
+    limit: "이용시간 제한 미확인", tip: "예약 가능", f: { plug: true, quiet: true, late: false } },
+  { id: "moeum", name: "모음", addr: "서대문구 신촌역로 11, 1~2층",
+    plug: ["창가 자리마다 있음", "review"], quiet: ["조용하지만 2층은 소리가 울림", "review"],
+    seats: ["1인석·다인석 섞임 · 공부는 주로 2층", "review"], hours: ["영업시간 미확인", "unknown"],
+    limit: "3시간 이후 추가 주문 (리뷰)", tip: "계단이 가팔라요", f: { plug: false, quiet: true, late: false } },
+  { id: "dokdabang", name: "독수리다방", addr: "서대문구 명물길 36 8층 (엘리베이터 있음) · 신촌역 3번 출구 5분",
+    plug: ["대부분 좌석에 있음, 없는 구역도 있음", "guess"], quiet: ["조용하고 집중하기 좋음", "guess"],
+    seats: ["8층 · 테라스석 많음(겨울엔 추움)", "guess"], hours: ["매일 11:00~24:00 · 라스트오더 23:30", "guess"],
+    limit: "이용시간 제한 미확인", tip: "2023년 후기 기준이라 바뀌었을 수 있어요", f: { plug: true, quiet: true, late: true } },
+  { id: "sbux", name: "스타벅스 신촌점", addr: "서대문구 연세로 10-1, 1~3층",
+    plug: ["콘센트 미확인", "unknown"], quiet: ["프랜차이즈라 대화 소리 있음", "guess"],
+    seats: ["1층은 좁고 2·3층이 공부하기 좋음", "review"], hours: ["평일 07:00~22:00 정도", "guess"],
+    limit: "이용시간 제한 없음 (추정)", tip: "연대 근처 스타벅스가 3곳이라 사이렌오더 매장 확인", f: { plug: false, quiet: false, late: false } },
+];
+
+const LV = { free: "자리 여유", mid: "보통", full: "꽉 참" };
+const TTL = 2 * 60 * 60 * 1000;
+const KEY = "sinchon-cafe-reports-v1";
+const now = Date.now();
+const EXAMPLES = {
+  bruce: { level: "mid", t: now - 18 * 60000, example: true },
+  moonbear: { level: "free", t: now - 7 * 60000, example: true },
+  moeum: { level: "full", t: now - 41 * 60000, example: true },
+  sbux: { level: "full", t: now - 25 * 60000, example: true },
+};
+
+function load() { try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { return null; } }
+function save(d) { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {} }
+
+let reports = load();
+let usingExamples = false;
+if (!reports) { reports = { ...EXAMPLES }; usingExamples = true; }
+const filters = { seat: false, plug: false, quiet: false, late: false };
+
+function ago(t) {
+  const m = Math.round((Date.now() - t) / 60000);
+  if (m < 1) return "방금 전";
+  if (m < 60) return m + "분 전";
+  return Math.floor(m / 60) + "시간 " + (m % 60) + "분 전";
+}
+function current(id) {
+  const r = reports[id];
+  if (!r || Date.now() - r.t > TTL) return null;
+  return r;
+}
+function tag(kind) {
+  if (kind === "review") return '<span class="tag review">리뷰</span>';
+  if (kind === "guess") return '<span class="tag guess">추정</span>';
+  if (kind === "unknown") return '<span class="tag unknown">미확인</span>';
+  return "";
+}
+function esc(s) { return s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+function render() {
+  const list = document.getElementById("list");
+  const shown = CAFES.filter(c => {
+    const r = current(c.id);
+    if (filters.seat && !(r && r.level !== "full")) return false;
+    if (filters.plug && !c.f.plug) return false;
+    if (filters.quiet && !c.f.quiet) return false;
+    if (filters.late && !c.f.late) return false;
+    return true;
+  });
+  if (!shown.length) { list.innerHTML = '<p class="empty">조건에 맞는 카페가 없어요. 필터를 하나 꺼보세요.</p>'; return; }
+  list.innerHTML = shown.map(c => {
+    const r = current(c.id);
+    const st = r
+      ? `<div class="status ${r.level}"><span class="lv">${LV[r.level]}${r.example ? '<span class="ex">예시</span>' : ""}</span><span class="ago">${ago(r.t)}</span></div>`
+      : `<div class="status none"><span class="lv">정보 없음</span><span class="ago">첫 제보를 해주세요</span></div>`;
+    const mapUrl = "https://map.naver.com/p/search/" + encodeURIComponent("신촌 " + c.name.replace(" 신촌", ""));
+    return `<article class="card">
+      <div class="card-top"><div><h2>${esc(c.name)}</h2><div class="addr">${esc(c.addr)}</div></div>${st}</div>
+      <dl>
+        <dt>콘센트</dt><dd>${esc(c.plug[0])}${tag(c.plug[1])}</dd>
+        <dt>소음</dt><dd>${esc(c.quiet[0])}${tag(c.quiet[1])}</dd>
+        <dt>좌석</dt><dd>${esc(c.seats[0])}${tag(c.seats[1])}</dd>
+        <dt>영업</dt><dd>${esc(c.hours[0])}${tag(c.hours[1])}</dd>
+        <dt>이용</dt><dd>${esc(c.limit)}</dd>
+      </dl>
+      <p class="report-label">지금 여기 있어요? 자리 상태를 알려주세요</p>
+      <div class="report">
+        <button class="free" data-id="${c.id}" data-lv="free">여유</button>
+        <button class="mid" data-id="${c.id}" data-lv="mid">보통</button>
+        <button class="full" data-id="${c.id}" data-lv="full">꽉 참</button>
+      </div>
+      <div class="card-foot"><span class="tip">팁 · ${esc(c.tip)}</span><a href="${mapUrl}" target="_blank" rel="noopener">네이버 지도에서 보기 ↗</a></div>
+    </article>`;
+  }).join("");
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg; el.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 1800);
+}
+
+document.getElementById("list").addEventListener("click", e => {
+  const b = e.target.closest(".report button");
+  if (!b) return;
+  if (usingExamples) { reports = {}; usingExamples = false; document.getElementById("notice").hidden = true; }
+  reports[b.dataset.id] = { level: b.dataset.lv, t: Date.now() };
+  save(reports);
+  render();
+  toast(`'${LV[b.dataset.lv]}'(으)로 공유했어요. 고마워요!`);
+});
+document.querySelectorAll(".chip-btn").forEach(btn => btn.addEventListener("click", () => {
+  const k = btn.dataset.f; filters[k] = !filters[k];
+  btn.setAttribute("aria-pressed", String(filters[k])); render();
+}));
+if (!usingExamples) document.getElementById("notice").hidden = true;
+render();
+setInterval(render, 60000);
+</script>
