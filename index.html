@@ -158,7 +158,7 @@ footer a { color: var(--muted); word-break: break-all; }
 
   <footer>
     <div><b>정보 표시 방법</b> · 표시 없음: 출처에서 확인 · <span class="tagq">리뷰</span> 방문자 후기 기준 · <span class="tagq">추정</span> 오래됐거나 불확실 · <span class="tagq">미확인</span> 아직 모름 · <span class="tagq">제보</span> 신촌 학생 제보. 가기 전에 지도 앱에서 영업시간을 한 번 더 확인하세요.</div>
-    <div>지금 버전은 내가 누른 혼잡도가 <b>이 폰(브라우저)에만</b> 저장돼요. 친구 폰에는 아직 안 보여요.</div>
+    <div id="share-note">지금 버전은 내가 누른 자리 상태가 <b>이 폰(브라우저)에만</b> 저장돼요. 친구 폰에는 아직 안 보여요.</div>
     <div>출처: <a href="https://polle.com/place/43f9BY/%EC%8B%A0%EC%B4%8C%20%EB%B8%8C%EB%A3%A8%EC%8A%A4">폴레 신촌 브루스</a> · <a href="https://polle.com/place/3fAl4k/%EB%AC%B8%20%EB%B2%A0%EC%96%B4">폴레 문 베어</a> · <a href="https://polle.com/place/5FapaF/%EB%AA%A8%EC%9D%8C">폴레 모음</a> · <a href="https://theendurer.tistory.com/entry/%EC%8B%A0%EC%B4%8C-%EB%8F%85%EC%88%98%EB%A6%AC-%EB%8B%A4%EB%B0%A9Dok-Dabang">독수리다방 블로그 후기(2023)</a> · <a href="https://polle.com/place/2oxDqq/%EC%8A%A4%ED%83%80%EB%B2%85%EC%8A%A4%20%EC%BB%A4%ED%94%BC">폴레 스타벅스 신촌점</a> · <a href="https://ciee.org/go-abroad/college-study-abroad/blog/my-top-4-favorite-cafes-sinchon">CIEE 신촌 카페 후기(2023)</a> · <a href="https://www.siksinhot.com/toplists/best/112114_coffee">식신 신촌 카페 리스트(2023)</a> · <a href="https://the-edit.co.kr/40071">디에디트 기사(2021)</a></div>
   </footer>
 
@@ -240,12 +240,40 @@ const EXAMPLES = {
   moeum: { level: "full", t: now - 41 * 60000, example: true },
   sbux: { level: "full", t: now - 25 * 60000, example: true },
 };
+/* 공유 서버 (Supabase). 비어 있으면 이 브라우저에만 저장 */
+const SB_URL = "https://elczhnsdpephxacvkxsd.supabase.co";
+const SB_KEY = "sb_publishable_eZbPqRt6zbgjvhzSeurstw_4KYiu3tL";
+const SHARED = !!(SB_URL && SB_KEY);
+const SB_HEAD = SB_KEY.startsWith("sb_") ? { apikey: SB_KEY } : { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` };
 function load() { try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { return null; } }
 function save(d) { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {} }
-let reports = load();
+let reports = SHARED ? {} : load();
 let usingExamples = false;
 if (!reports) { reports = { ...EXAMPLES }; usingExamples = true; }
-
+async function pull() {
+  if (!SHARED) return;
+  try {
+    const since = new Date(Date.now() - TTL).toISOString();
+    const res = await fetch(`${SB_URL}/rest/v1/reports?select=cafe_id,level,created_at&created_at=gte.${encodeURIComponent(since)}&order=created_at.desc&limit=500`, { headers: SB_HEAD });
+    if (!res.ok) throw new Error(res.status);
+    const rows = await res.json(); const next = {};
+    for (const r of rows) if (!next[r.cafe_id]) next[r.cafe_id] = { level: r.level, t: Date.parse(r.created_at) };
+    reports = next; refreshAll();
+  } catch (e) { console.warn("공유 서버에서 못 불러옴", e); }
+}
+async function push(id, lv) {
+  if (!SHARED) return true;
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/reports`, { method: "POST", headers: { ...SB_HEAD, "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify({ cafe_id: id, level: lv }) });
+    return res.ok;
+  } catch (e) { return false; }
+}
+function recentlyReported(id) {
+  try { const m = JSON.parse(localStorage.getItem("sinchon-last-report") || "{}"); return m[id] && Date.now() - m[id] < 10 * 60000; } catch (e) { return false; }
+}
+function markReported(id) {
+  try { const m = JSON.parse(localStorage.getItem("sinchon-last-report") || "{}"); m[id] = Date.now(); localStorage.setItem("sinchon-last-report", JSON.stringify(m)); } catch (e) {}
+}
 function ago(t) {
   const m = Math.round((Date.now() - t) / 60000);
   if (m < 1) return "방금 전";
@@ -383,13 +411,16 @@ rack.addEventListener("wheel", e => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY
 /* ---------- 제보 ---------- */
 let toastTimer;
 function toast(msg) { const el = document.getElementById("toast"); el.textContent = msg; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 1800); }
-function report(id, lv) {
+function refreshAll() { const k = rot; build(); rot = k; layout(); refreshPins(); }
+async function report(id, lv) {
+  if (SHARED && recentlyReported(id)) { toast("같은 카페는 10분에 한 번만 알려줄 수 있어요"); return; }
   if (usingExamples) { reports = {}; usingExamples = false; document.getElementById("ex-note").hidden = true; }
   reports[id] = { level: lv, t: Date.now() };
-  save(reports);
-  const keepRot = rot; build(); rot = keepRot; layout();
-  refreshPins();
-  toast(`'${LV[lv]}'(으)로 공유했어요. 고마워요!`);
+  if (!SHARED) save(reports);
+  refreshAll();
+  const ok = await push(id, lv);
+  if (ok) { markReported(id); toast(`'${LV[lv]}'(으)로 공유했어요. 고마워요!`); }
+  else toast("인터넷 연결을 확인하고 다시 눌러주세요");
 }
 document.addEventListener("click", e => { const b = e.target.closest(".report button"); if (b) report(b.dataset.id, b.dataset.lv); });
 
@@ -434,8 +465,10 @@ function route() {
 }
 document.querySelectorAll(".cafe-count").forEach(el => el.textContent = CAFES.length);
 if (!usingExamples) document.getElementById("ex-note").hidden = true;
+if (SHARED) document.getElementById("share-note").textContent = "누군가 누른 자리 상태는 모두에게 똑같이 보여요. 같은 카페는 10분에 한 번만 알려줄 수 있어요.";
 build();
 window.addEventListener("hashchange", route);
 route();
-setInterval(() => { const k = rot; build(); rot = k; layout(); refreshPins(); }, 60000);
+pull();
+setInterval(() => { if (SHARED) pull(); else refreshAll(); }, 60000);
 </script>
