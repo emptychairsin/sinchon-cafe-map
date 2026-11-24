@@ -109,6 +109,7 @@ footer a { color: var(--muted); word-break: break-all; }
 .map-note, .unpinned { font-size: 13px; color: var(--muted); margin: 0; }
 .pin { width: 13px; height: 13px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); background: var(--c); }
 .pin-wrap { background: none; border: none; }
+.gray-tiles { filter: grayscale(1) contrast(.85) brightness(1.08); }
 .leaflet-popup-content-wrapper { border-radius: 0; }
 .leaflet-popup-content { margin: 12px 14px; font-family: var(--sans); font-size: 13.5px; line-height: 1.5; color: #111; min-width: 210px; }
 .pop h3 { margin: 0 0 4px; font-size: 16px; letter-spacing: -0.03em; }
@@ -504,16 +505,9 @@ async function report(id, lv) {
 document.addEventListener("click", e => { const b = e.target.closest(".report button"); if (b) report(b.dataset.id, b.dataset.lv); });
 
 /* ---------- 지도 ---------- */
-/* 바탕 지도: 열쇠 없이 쓰는 연회색 지도. 안 뜨면 기본 OSM 지도로 바꿈 */
+/* 바탕 지도: 열쇠 없이 쓰는 OpenStreetMap을 회색으로 칠해서 사용 */
 function addBase(m) {
-  const base = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19, maxNativeZoom: 16, attribution: "Tiles &copy; Esri, OpenStreetMap" }).addTo(m);
-  const ref = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19, maxNativeZoom: 16 }).addTo(m);
-  let errs = 0, swapped = false;
-  base.on("tileerror", () => {
-    if (swapped || ++errs < 4) return;
-    swapped = true; m.removeLayer(base); m.removeLayer(ref);
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "&copy; OpenStreetMap" }).addTo(m);
-  });
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, className: "gray-tiles", attribution: "&copy; OpenStreetMap" }).addTo(m);
 }
 
 let map = null; const markers = {};
@@ -531,7 +525,7 @@ function pinIcon(c) {
 }
 function initMap() {
   if (map || typeof L === "undefined") return;
-  map = L.map("map").setView([37.5580, 126.9380], 17);
+  map = L.map("map").setView([37.5580, 126.9380], 16);
   addBase(map);
   CAFES.filter(c => c.pos).forEach(c => { markers[c.id] = L.marker(c.pos, { icon: pinIcon(c), title: c.name }).addTo(map).bindPopup(() => popupHtml(c)); });
   const un = CAFES.filter(c => !c.pos);
@@ -554,7 +548,7 @@ function fixRender() {
 }
 function initFix() {
   if (fixMap || typeof L === "undefined") return;
-  fixMap = L.map("fixmap").setView([37.5580, 126.9380], 17);
+  fixMap = L.map("fixmap").setView([37.5580, 126.9380], 16);
   addBase(fixMap);
   CAFES.forEach((c, i) => {
     const pos = c.pos || [37.5530 - Math.floor(i / 6) * 0.0006, 126.9330 + (i % 6) * 0.0012];
