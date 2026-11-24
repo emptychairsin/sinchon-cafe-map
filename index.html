@@ -71,6 +71,7 @@ dd { margin: 0; min-width: 0; }
 .tag.review { background: var(--none-bg); color: var(--muted); }
 .tag.guess { background: var(--mid-bg); color: var(--mid); }
 .tag.unknown { background: var(--none-bg); color: var(--muted); }
+.tag.tip { background: var(--free-bg); color: var(--free); }
 .report-label { font-size: 13px; color: var(--muted); margin: 0; }
 .report { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .report button { font: inherit; font-weight: 700; font-size: 14px; border-radius: 10px; padding: 10px 4px; cursor: pointer; border: 1.5px solid transparent; }
@@ -103,13 +104,13 @@ footer a { color: var(--muted); word-break: break-all; }
     <button class="chip-btn" id="f-seat" aria-pressed="false" data-f="seat">자리 있는 곳만</button>
     <button class="chip-btn" id="f-plug" aria-pressed="false" data-f="plug">콘센트 많음</button>
     <button class="chip-btn" id="f-quiet" aria-pressed="false" data-f="quiet">조용함</button>
-    <button class="chip-btn" id="f-late" aria-pressed="false" data-f="late">밤 10시 이후도</button>
+    <button class="chip-btn" id="f-late" aria-pressed="false" data-f="late">밤 10시 이후 · 24시</button>
   </div>
 
   <div class="list" id="list"></div>
 
   <footer>
-    <div><b>정보 표시 방법</b> · 표시 없음: 출처에서 확인 · <span class="tag review">리뷰</span> 방문자 후기 기준 · <span class="tag guess">추정</span> 오래됐거나 불확실 · <span class="tag unknown">미확인</span> 아직 모름. 가기 전에 지도 앱에서 영업시간을 한 번 더 확인하세요.</div>
+    <div><b>정보 표시 방법</b> · 표시 없음: 출처에서 확인 · <span class="tag review">리뷰</span> 방문자 후기 기준 · <span class="tag guess">추정</span> 오래됐거나 불확실 · <span class="tag unknown">미확인</span> 아직 모름 · <span class="tag tip">제보</span> 신촌 학생 제보. 가기 전에 지도 앱에서 영업시간을 한 번 더 확인하세요.</div>
     <div>지금 버전은 내가 누른 혼잡도가 <b>이 폰(브라우저)에만</b> 저장돼요. 친구 폰에는 아직 안 보여요.</div>
     <div>출처: <a href="https://polle.com/place/43f9BY/%EC%8B%A0%EC%B4%8C%20%EB%B8%8C%EB%A3%A8%EC%8A%A4">폴레 신촌 브루스</a> · <a href="https://polle.com/place/3fAl4k/%EB%AC%B8%20%EB%B2%A0%EC%96%B4">폴레 문 베어</a> · <a href="https://polle.com/place/5FapaF/%EB%AA%A8%EC%9D%8C">폴레 모음</a> · <a href="https://theendurer.tistory.com/entry/%EC%8B%A0%EC%B4%8C-%EB%8F%85%EC%88%98%EB%A6%AC-%EB%8B%A4%EB%B0%A9Dok-Dabang">독수리다방 블로그 후기(2023)</a> · <a href="https://polle.com/place/2oxDqq/%EC%8A%A4%ED%83%80%EB%B2%85%EC%8A%A4%20%EC%BB%A4%ED%94%BC">폴레 스타벅스 신촌점</a> · <a href="https://ciee.org/go-abroad/college-study-abroad/blog/my-top-4-favorite-cafes-sinchon">CIEE 신촌 카페 후기(2023)</a> · <a href="https://www.siksinhot.com/toplists/best/112114_coffee">식신 신촌 카페 리스트(2023)</a> · <a href="https://the-edit.co.kr/40071">디에디트 기사(2021)</a></div>
   </footer>
@@ -158,6 +159,18 @@ const CAFES = [
     plug: ["콘센트 미확인", "unknown"], quiet: ["층고 높고 넓어서 덜 북적임", "review"],
     seats: ["좌석 많고 간격 여유 · 2층은 임스 체어", "review"], hours: ["매일 12:00~22:00 · 라스트오더 21:30", "guess"],
     limit: "이용시간 제한 미확인", tip: "노트북 작업하는 사람 많음 (2021 기사)", f: { plug: false, quiet: false, late: false } },
+  { id: "caffeine", name: "카페인코너", addr: "신촌 (정확한 주소는 지도에서 확인)",
+    plug: ["콘센트 미확인", "unknown"], quiet: ["소음 미확인", "unknown"],
+    seats: ["좌석 정보 미확인", "unknown"], hours: ["24시간 영업", "tip"],
+    limit: "이용시간 제한 미확인", tip: "밤샘 공부할 때 갈 곳", f: { plug: false, quiet: false, late: true } },
+  { id: "cafeann", name: "카페 앤", addr: "신촌 (정확한 주소는 지도에서 확인)",
+    plug: ["콘센트 미확인", "unknown"], quiet: ["소음 미확인", "unknown"],
+    seats: ["좌석 정보 미확인", "unknown"], hours: ["밤 10시 이후에도 영업", "tip"],
+    limit: "이용시간 제한 미확인", tip: "늦게까지 여는 곳", f: { plug: false, quiet: false, late: true } },
+  { id: "ediya", name: "이디야 신촌", addr: "신촌 (매장이 여러 곳일 수 있어요, 지도에서 확인)",
+    plug: ["콘센트 미확인", "unknown"], quiet: ["프랜차이즈라 대화 소리 있음", "guess"],
+    seats: ["좌석 정보 미확인", "unknown"], hours: ["밤 10시 이후에도 영업", "tip"],
+    limit: "이용시간 제한 없음 (추정)", tip: "늦게까지 여는 곳", f: { plug: false, quiet: false, late: true } },
 ];
 
 const LV = { free: "자리 여유", mid: "보통", full: "꽉 참" };
@@ -194,6 +207,7 @@ function tag(kind) {
   if (kind === "review") return '<span class="tag review">리뷰</span>';
   if (kind === "guess") return '<span class="tag guess">추정</span>';
   if (kind === "unknown") return '<span class="tag unknown">미확인</span>';
+  if (kind === "tip") return '<span class="tag tip">제보</span>';
   return "";
 }
 function esc(s) { return s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
