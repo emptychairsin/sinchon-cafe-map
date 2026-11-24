@@ -107,7 +107,7 @@ footer a { color: var(--muted); word-break: break-all; }
 .mapwrap h1 { margin: 8px 0 0; font-size: clamp(2.4rem, 10vw, 4.4rem); font-weight: 600; letter-spacing: -0.04em; line-height: .95; }
 #map { width: 100%; height: 66vh; min-height: 360px; border: 1px solid var(--ink); background: #d9d9d6; }
 .map-note, .unpinned { font-size: 13px; color: var(--muted); margin: 0; }
-.pin { width: 20px; height: 20px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); background: var(--c); }
+.pin { width: 13px; height: 13px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); background: var(--c); }
 .pin-wrap { background: none; border: none; }
 .leaflet-popup-content-wrapper { border-radius: 0; }
 .leaflet-popup-content { margin: 12px 14px; font-family: var(--sans); font-size: 13.5px; line-height: 1.5; color: #111; min-width: 210px; }
@@ -186,23 +186,23 @@ footer a { color: var(--muted); word-break: break-all; }
 <script src="vendor/leaflet.js"></script>
 <script>
 const CAFES = [
-  { id: "bruce", pos: [37.5554, 126.9380], name: "신촌 브루스", addr: "서대문구 신촌로 87-4 4층 (엘리베이터 없음)",
+  { id: "bruce", pos: [37.55610, 126.93607], name: "신촌 브루스", addr: "서대문구 신촌로 87-4 4층 (엘리베이터 없음)",
     plug: ["많음, 일부 자리는 없음", "review"], quiet: ["조용한 편, 음악은 있음", "review"],
     seats: ["테이블 넓고 간격 넉넉, 좌석 수 미확인", "review"], hours: ["영업시간 미확인", "unknown"],
     limit: "4시간 이용 (리뷰)", tip: "주말보다 평일 추천", f: { plug: true, quiet: true, late: false, solo: false } },
-  { id: "moonbear", pos: [37.5585, 126.9388], name: "문 베어 신촌", addr: "서대문구 명물길 66 1층",
+  { id: "moonbear", pos: [37.55896, 126.93984], name: "문 베어 신촌", addr: "서대문구 명물길 66 1층",
     plug: ["많음", "review"], quiet: ["잔잔한 피아노 음악", "review"],
     seats: ["독서실형 칸막이석, 커튼 있는 창가석", "review"], hours: ["연중무휴, 시간 미확인", "unknown"],
     limit: "이용시간 제한 미확인", tip: "예약 가능", f: { plug: true, quiet: true, late: false, solo: true } },
-  { id: "moeum", pos: [37.5582, 126.9418], name: "모음", addr: "서대문구 신촌역로 11, 1~2층",
+  { id: "moeum", pos: [37.55770, 126.94256], name: "모음", addr: "서대문구 신촌역로 11, 1~2층",
     plug: ["창가 자리마다 있음", "review"], quiet: ["조용하지만 2층은 소리가 울림", "review"],
     seats: ["1인석과 다인석 섞임, 공부는 주로 2층", "review"], hours: ["영업시간 미확인", "unknown"],
     limit: "3시간 이후 추가 주문 (리뷰)", tip: "계단이 가팔라요", f: { plug: false, quiet: true, late: false, solo: true } },
-  { id: "dokdabang", pos: [37.5574, 126.9378], name: "독수리다방", addr: "서대문구 명물길 36 8층 (엘리베이터 있음), 신촌역 3번 출구 5분",
+  { id: "dokdabang", pos: [37.55881, 126.93717], name: "독수리다방", addr: "서대문구 명물길 36 8층 (엘리베이터 있음), 신촌역 3번 출구 5분",
     plug: ["대부분 좌석에 있음, 없는 구역도 있음", "guess"], quiet: ["조용하고 집중하기 좋음", "guess"],
     seats: ["8층, 테라스석 많음(겨울엔 추움)", "guess"], hours: ["매일 11:00~24:00, 라스트오더 23:30", "guess"],
     limit: "이용시간 제한 미확인", tip: "2023년 후기 기준이라 바뀌었을 수 있어요", f: { plug: true, quiet: true, late: true, solo: false } },
-  { id: "sbux", pos: [37.5560, 126.9370], name: "스타벅스 신촌점", addr: "서대문구 연세로 10-1, 1~3층",
+  { id: "sbux", name: "스타벅스 신촌점", addr: "서대문구 연세로 10-1, 1~3층",
     plug: ["콘센트 미확인", "unknown"], quiet: ["손님 많아 대화 소리 있음", "review"],
     seats: ["1층은 좁고 2, 3층이 공부하기 좋음", "review"], hours: ["07:00~22:00 (요일마다 조금 다름)", "review"],
     limit: "이용시간 제한 없음 (추정)", tip: "연대 근처 스타벅스가 여러 곳이라 사이렌오더 매장 확인", f: { plug: false, quiet: false, late: false, solo: false } },
@@ -222,7 +222,7 @@ const CAFES = [
     plug: ["콘센트 미확인", "unknown"], quiet: ["아늑하고 조용한 편", "review"],
     seats: ["비행기 좌석형 1인 공간, 개인 스탠드, 담요, 와이파이", "review"], hours: ["영업시간 미확인", "unknown"],
     limit: "2시간 이용권(음료 무제한), 정액권 있음 (리뷰)", tip: "일반 카페보다 스터디카페에 가까워요", f: { plug: false, quiet: true, late: false, solo: true } },
-  { id: "moritz", pos: [37.5547, 126.9318], name: "모리츠플라츠", addr: "마포구 와우산로 174, 1~2층 (신촌과 홍대 사이)",
+  { id: "moritz", name: "모리츠플라츠", addr: "마포구 와우산로 174, 1~2층 (신촌과 홍대 사이)",
     plug: ["콘센트 미확인", "unknown"], quiet: ["층고 높고 넓어서 덜 북적임", "review"],
     seats: ["좌석 많고 간격 여유, 2층은 임스 체어", "review"], hours: ["매일 12:00~22:00, 라스트오더 21:30", "guess"],
     limit: "이용시간 제한 미확인", tip: "노트북 작업하는 사람 많음 (2021 기사)", f: { plug: false, quiet: false, late: false, solo: false } },
@@ -238,11 +238,11 @@ const CAFES = [
     plug: ["콘센트 미확인", "unknown"], quiet: ["프랜차이즈라 대화 소리 있음", "guess"],
     seats: ["좌석 정보 미확인", "unknown"], hours: ["밤 10시 이후에도 영업", "tip"],
     limit: "이용시간 제한 없음 (추정)", tip: "늦게까지 여는 곳", f: { plug: false, quiet: false, late: true, solo: false } },
-  { id: "sbux-yonsei", pos: [37.558, 126.9365], name: "스타벅스 연대점", addr: "서대문구 연세로 35",
+  { id: "sbux-yonsei", pos: [37.55835, 126.93655], name: "스타벅스 연대점", addr: "서대문구 연세로 35",
     plug: ["콘센트 미확인", "unknown"], quiet: ["프랜차이즈라 대화 소리 있음", "guess"],
     seats: ["좌석은 2층부터, 3, 4층까지 있음", "review"], hours: ["평일 08:00~20:00, 주말 09:00~20:00", "review"],
     limit: "이용시간 제한 없음 (추정)", tip: "좌석 층이 많아서 넓은 편", f: { plug: false, quiet: false, late: false, solo: false } },
-  { id: "sbux-myeongmul", pos: [37.5569, 126.9376], name: "스타벅스 신촌명물거리점", addr: "서대문구 명물길 24",
+  { id: "sbux-myeongmul", pos: [37.55782, 126.93793], name: "스타벅스 신촌명물거리점", addr: "서대문구 명물길 24",
     plug: ["콘센트 미확인", "unknown"], quiet: ["프랜차이즈라 대화 소리 있음", "guess"],
     seats: ["좌석 정보 미확인", "unknown"], hours: ["매일 09:00~21:00", "review"],
     limit: "이용시간 제한 없음 (추정)", tip: "명물거리 한가운데", f: { plug: false, quiet: false, late: false, solo: false } },
@@ -266,7 +266,7 @@ const CAFES = [
     plug: ["콘센트 미확인", "unknown"], quiet: ["프랜차이즈라 대화 소리 있음", "guess"],
     seats: ["좌석 정보 미확인", "unknown"], hours: ["평일 07:00~22:00, 일 08:00~19:00", "review"],
     limit: "이용시간 제한 없음 (추정)", tip: "서강대 쪽에서 가까워요", f: { plug: false, quiet: false, late: false, solo: false } },
-  { id: "twosome-yonseiro", pos: [37.5574, 126.9372], name: "투썸플레이스 신촌연세로점", addr: "서대문구 연세로 28",
+  { id: "twosome-yonseiro", pos: [37.55843, 126.93687], name: "투썸플레이스 신촌연세로점", addr: "서대문구 연세로 28",
     plug: ["콘센트 미확인", "unknown"], quiet: ["프랜차이즈라 대화 소리 있음", "guess"],
     seats: ["1층 주문, 3층까지 좌석", "review"], hours: ["08:00~24:00 (24시간이라는 정보도 있음)", "guess"],
     limit: "이용시간 제한 없음 (추정)", tip: "늦게까지 공부할 때", f: { plug: false, quiet: false, late: true, solo: false } },
@@ -282,7 +282,7 @@ const CAFES = [
     plug: ["콘센트 미확인", "unknown"], quiet: ["프랜차이즈라 대화 소리 있음", "guess"],
     seats: ["개인실 있다는 정보 있음", "review"], hours: ["매일 10:30~23:30", "review"],
     limit: "이용시간 제한 없음 (추정)", tip: "밤 11시 반까지 열어요", f: { plug: false, quiet: false, late: true, solo: false } },
-  { id: "hollys-sinchon", pos: [37.558, 126.9372], name: "할리스 신촌점", addr: "서대문구 연세로 34, 1~3층",
+  { id: "hollys-sinchon", pos: [37.55863, 126.93692], name: "할리스 신촌점", addr: "서대문구 연세로 34, 1~3층",
     plug: ["콘센트 미확인", "unknown"], quiet: ["2층은 조용, 3층은 활기참", "review"],
     seats: ["2층은 조용하고 3층은 북적이는 편", "review"], hours: ["매일 09:00~23:00", "review"],
     limit: "이용시간 제한 없음 (추정)", tip: "조용히 하려면 2층", f: { plug: false, quiet: false, late: true, solo: false } },
@@ -515,12 +515,12 @@ function popupHtml(c) {
 }
 function pinIcon(c) {
   const r = current(c.id);
-  return L.divIcon({ className: "pin-wrap", html: `<div class="pin" style="--c:${COL[r ? r.level : "none"]}"></div>`, iconSize: [20, 20], iconAnchor: [10, 10], popupAnchor: [0, -10] });
+  return L.divIcon({ className: "pin-wrap", html: `<div class="pin" style="--c:${COL[r ? r.level : "none"]}"></div>`, iconSize: [13, 13], iconAnchor: [6, 6], popupAnchor: [0, -6] });
 }
 function initMap() {
   if (map || typeof L === "undefined") return;
-  map = L.map("map").setView([37.5568, 126.9375], 16);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "&copy; OpenStreetMap" }).addTo(map);
+  map = L.map("map").setView([37.5580, 126.9380], 17);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { maxZoom: 20, subdomains: "abcd", attribution: "&copy; OpenStreetMap &copy; CARTO" }).addTo(map);
   CAFES.filter(c => c.pos).forEach(c => { markers[c.id] = L.marker(c.pos, { icon: pinIcon(c), title: c.name }).addTo(map).bindPopup(() => popupHtml(c)); });
   const un = CAFES.filter(c => !c.pos);
   document.getElementById("unpinned").innerHTML = un.length ? "아직 정확한 위치를 몰라서 지도에 없는 곳: " + un.map(c => `<a href="${mapUrl(c)}" target="_blank" rel="noopener">${esc(c.name)}</a>`).join(", ") : "";
@@ -542,8 +542,8 @@ function fixRender() {
 }
 function initFix() {
   if (fixMap || typeof L === "undefined") return;
-  fixMap = L.map("fixmap").setView([37.5568, 126.9375], 16);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "&copy; OpenStreetMap" }).addTo(fixMap);
+  fixMap = L.map("fixmap").setView([37.5580, 126.9380], 17);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { maxZoom: 20, subdomains: "abcd", attribution: "&copy; OpenStreetMap &copy; CARTO" }).addTo(fixMap);
   CAFES.forEach((c, i) => {
     const pos = c.pos || [37.5530 - Math.floor(i / 6) * 0.0006, 126.9330 + (i % 6) * 0.0012];
     fixPos[c.id] = pos;
