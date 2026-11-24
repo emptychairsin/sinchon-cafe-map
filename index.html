@@ -56,6 +56,7 @@ button { font-family: inherit; }
 .area-switch a { color: var(--muted); text-decoration: none; }
 .area-switch a[aria-current="page"] { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
 .home-cap { font-size: 13px; letter-spacing: .08em; margin: 0; font-weight: 500; }
+.home-hint { font-size: 12px; letter-spacing: .08em; margin: 6px 0 0; color: var(--muted); }
 @media (max-width: 520px) { .hero { aspect-ratio: 3 / 4; max-height: none; } }
 
 /* ---- CAFE LIST ---- */
@@ -159,6 +160,7 @@ footer a { color: var(--muted); word-break: break-all; }
   </div>
   <div class="dots" role="group" aria-label="지역 고르기"><button data-go="0" aria-label="신촌" aria-current="true"></button><button data-go="1" aria-label="연남 연희"></button></div>
   <p class="home-cap" id="home-cap"></p>
+  <p class="home-hint" id="home-hint"></p>
 </section>
 
 <nav class="topnav" id="topnav" hidden aria-label="페이지 이동">
@@ -797,6 +799,7 @@ function paintSlide(i) {
   const key = i === 1 ? "yy" : "sinchon";
   const n = CAFES.filter(c => (c.area || "sinchon") === key).length;
   document.getElementById("home-cap").textContent = `${AREAS[key].name} STUDY CAFE MAP (${n} CAFES)`;
+  document.getElementById("home-hint").textContent = `PRESS CAFE TO SEE THE CAFE LIST, PRESS ${AREAS[key].name} TO SEE THE MAP`;
 }
 function showSlide(i, instant) { slidesEl.scrollTo({ left: i * slidesEl.clientWidth, behavior: instant ? "auto" : "smooth" }); paintSlide(i); }
 slidesEl.addEventListener("scroll", () => { clearTimeout(slidesEl._t); slidesEl._t = setTimeout(() => paintSlide(slideIndex()), 60); });
