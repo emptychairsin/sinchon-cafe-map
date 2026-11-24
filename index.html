@@ -113,6 +113,9 @@ footer a { color: var(--muted); word-break: break-all; }
 .fb-send { align-self: flex-start; border: none; background: var(--ink); color: var(--bg); padding: 12px 28px; font-size: 14px; font-weight: 600; cursor: pointer; }
 .fb-send:disabled { opacity: .5; }
 /* ---- 지도 ---- */
+.kpop { position: relative; background: #fff; color: #111; padding: 12px 14px; width: 240px; border: 1px solid #111; box-shadow: 0 6px 18px rgba(0,0,0,.15); font-family: var(--sans); font-size: 13.5px; line-height: 1.5; }
+.kpop .kclose { position: absolute; top: 4px; right: 6px; border: none; background: none; font-size: 18px; cursor: pointer; color: #111; }
+
 .mapwrap { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 .mapwrap h1 { margin: 8px 0 0; font-size: clamp(2.4rem, 10vw, 4.4rem); font-weight: 600; letter-spacing: -0.04em; line-height: .95; }
 #map { width: 100%; height: 66vh; min-height: 360px; border: 1px solid var(--ink); background: #d9d9d6; }
@@ -181,7 +184,7 @@ footer a { color: var(--muted); word-break: break-all; }
 <section class="mapwrap" id="view-shinchon" hidden>
   <h1>SHINCHON</h1>
   <div id="map" role="region" aria-label="신촌 카페 지도"></div>
-  <p class="map-note">핀을 누르면 그 카페의 지금 자리 상태와 정보가 보여요. 거기서 바로 상태를 알려줄 수도 있어요. 핀은 주소 기준 대략적인 위치예요.</p>
+  <p class="map-note">핀을 누르면 그 카페의 지금 자리 상태와 정보가 보여요. 거기서 바로 상태를 알려줄 수도 있어요. </p>
   <p class="unpinned" id="unpinned"></p>
 </section>
 <section class="mapwrap" id="view-contact" hidden>
@@ -550,16 +553,72 @@ function pinIcon(c) {
   const r = current(c.id);
   return L.divIcon({ className: "pin-wrap", html: `<div class="pin" style="--c:${COL[r ? r.level : "none"]}"></div>`, iconSize: [13, 13], iconAnchor: [6, 6], popupAnchor: [0, -6] });
 }
-function initMap() {
-  if (map || typeof L === "undefined") return;
-  map = L.map("map").setView([37.5580, 126.9380], 16);
-  addBase(map);
-  CAFES.filter(c => c.pos).forEach(c => { markers[c.id] = L.marker(c.pos, { icon: pinIcon(c), title: c.name }).addTo(map).bindPopup(() => popupHtml(c)); });
+const KAKAO_KEY = "fb4eb23e3d4873f92cb218936e69e315";
+let mapKind = null, kInfo = null; const kPins = {};
+function listUnpinned() {
   const un = CAFES.filter(c => !c.pos);
   document.getElementById("unpinned").innerHTML = un.length ? "아직 정확한 위치를 몰라서 지도에 없는 곳: " + un.map(c => `<a href="${mapUrl(c)}" target="_blank" rel="noopener">${esc(c.name)}</a>`).join(", ") : "";
 }
+function initLeaflet() {
+  if (map || typeof L === "undefined") return;
+  mapKind = "leaflet";
+  map = L.map("map").setView([37.5580, 126.9380], 16);
+  addBase(map);
+  CAFES.filter(c => c.pos).forEach(c => { markers[c.id] = L.marker(c.pos, { icon: pinIcon(c), title: c.name }).addTo(map).bindPopup(() => popupHtml(c)); });
+}
+function initKakao() {
+  const km = kakao.maps;
+  mapKind = "kakao";
+  map = new km.Map(document.getElementById("map"), { center: new km.LatLng(37.5580, 126.9380), level: 3 });
+  map.addControl(new km.ZoomControl(), km.ControlPosition.RIGHT);
+  kInfo = new km.CustomOverlay({ yAnchor: 1.15, zIndex: 10 });
+  km.event.addListener(map, "click", () => { kInfo.setMap(null); kInfo._id = null; });
+  CAFES.filter(c => c.pos).forEach(c => {
+    const el = document.createElement("div");
+    el.className = "pin"; el.title = c.name; el.style.cursor = "pointer";
+    el.addEventListener("click", ev => { ev.stopPropagation(); openKakaoInfo(c); });
+    const ov = new km.CustomOverlay({ position: new km.LatLng(c.pos[0], c.pos[1]), content: el, yAnchor: 0.5, xAnchor: 0.5, zIndex: 5 });
+    ov.setMap(map); kPins[c.id] = el;
+  });
+  paintKakaoPins();
+}
+function openKakaoInfo(c) {
+  const box = document.createElement("div");
+  box.className = "kpop";
+  box.innerHTML = `<button class="kclose" aria-label="닫기">×</button>` + popupHtml(c);
+  box.querySelector(".kclose").addEventListener("click", () => { kInfo.setMap(null); kInfo._id = null; });
+  box.addEventListener("mousedown", e => e.stopPropagation());
+  box.addEventListener("touchstart", e => e.stopPropagation(), { passive: true });
+  kInfo.setContent(box); kInfo.setPosition(new kakao.maps.LatLng(c.pos[0], c.pos[1])); kInfo.setMap(map); kInfo._id = c.id;
+  map.panTo(new kakao.maps.LatLng(c.pos[0] + 0.0012, c.pos[1]));
+}
+function paintKakaoPins() {
+  CAFES.filter(c => c.pos).forEach(c => { const r = current(c.id); kPins[c.id] && kPins[c.id].style.setProperty("--c", COL[r ? r.level : "none"]); });
+}
+let kakaoLoading = false;
+function initMap() {
+  listUnpinned();
+  if (map || kakaoLoading) return;
+  kakaoLoading = true;
+  let done = false;
+  const fallback = () => { if (done) return; done = true; initLeaflet(); };
+  const timer = setTimeout(fallback, 5000);
+  const sc = document.createElement("script");
+  sc.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false`;
+  sc.onload = () => {
+    if (!window.kakao || !kakao.maps) return fallback();
+    kakao.maps.load(() => { if (done) return; done = true; clearTimeout(timer); try { initKakao(); } catch (e) { console.warn(e); map = null; initLeaflet(); } });
+  };
+  sc.onerror = () => { clearTimeout(timer); fallback(); };
+  document.head.appendChild(sc);
+}
 function refreshPins() {
   if (!map) return;
+  if (mapKind === "kakao") {
+    paintKakaoPins();
+    if (kInfo && kInfo._id) { const c = CAFES.find(x => x.id === kInfo._id); if (c) openKakaoInfo(c); }
+    return;
+  }
   CAFES.filter(c => c.pos).forEach(c => { const m = markers[c.id]; m.setIcon(pinIcon(c)); if (m.isPopupOpen()) m.setPopupContent(popupHtml(c)); });
 }
 
@@ -627,7 +686,7 @@ function route() {
   document.getElementById("topnav").hidden = view === "home";
   document.querySelectorAll("[data-nav]").forEach(a => a.dataset.nav === view ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
   if (view === "fix") { initFix(); setTimeout(() => fixMap && fixMap.invalidateSize(), 50); }
-  if (view === "shinchon") { initMap(); setTimeout(() => map && map.invalidateSize(), 50); }
+  if (view === "shinchon") { initMap(); setTimeout(() => { if (!map) return; if (mapKind === "kakao") map.relayout(); else map.invalidateSize(); }, 80); }
   window.scrollTo(0, 0);
 }
 document.querySelectorAll(".cafe-count").forEach(el => el.textContent = CAFES.length);
