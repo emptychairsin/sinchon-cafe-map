@@ -172,6 +172,15 @@ footer a { color: var(--muted); word-break: break-all; }
   <p class="map-note">핀을 누르면 그 카페의 지금 자리 상태와 정보가 보여요. 거기서 바로 상태를 알려줄 수도 있어요. 핀은 주소 기준 대략적인 위치예요.</p>
   <p class="unpinned" id="unpinned"></p>
 </section>
+<section class="mapwrap" id="view-fix" hidden>
+  <h1>PIN FIX</h1>
+  <p class="map-note">핀 위치 고치는 화면이에요. 아래 목록에서 카페를 고르고, 지도에서 실제 위치를 누르면 핀이 옮겨져요. 핀을 끌어서 옮겨도 돼요. 다 고치면 맨 아래 <b>위치 복사</b>를 눌러서 Claude에게 붙여넣어 주세요.</p>
+  <div id="fixmap" style="width:100%;height:58vh;min-height:320px;border:1px solid var(--ink);background:#d9d9d6"></div>
+  <p class="map-note" id="fix-sel">카페를 먼저 골라주세요.</p>
+  <div id="fix-list" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+  <button id="fix-copy" class="fbox" style="max-width:220px">위치 복사</button>
+  <textarea id="fix-out" readonly style="width:100%;height:140px;font-size:12px" hidden></textarea>
+</section>
 <div class="toast" id="toast" hidden></div>
 
 <script src="vendor/leaflet.js"></script>
@@ -521,15 +530,53 @@ function refreshPins() {
   CAFES.filter(c => c.pos).forEach(c => { const m = markers[c.id]; m.setIcon(pinIcon(c)); if (m.isPopupOpen()) m.setPopupContent(popupHtml(c)); });
 }
 
+
+/* ---------- 핀 위치 고치기 (#fix) ---------- */
+let fixMap = null, fixSel = null; const fixMarkers = {}; const fixPos = {}; const fixMoved = new Set();
+function fixLabel(c) { return L.divIcon({ className: "pin-wrap", html: `<div style="display:flex;align-items:center;gap:4px;white-space:nowrap"><div class="pin" style="--c:${c.id === fixSel ? "var(--full)" : fixMoved.has(c.id) ? "var(--free)" : "var(--none)"}"></div><span style="font:600 11px var(--sans);background:#fff;padding:0 3px">${esc(c.name)}</span></div>`, iconSize: [20, 20], iconAnchor: [10, 10] }); }
+function fixRender() {
+  document.getElementById("fix-list").innerHTML = CAFES.map(c => `<button class="fbox" data-fix="${c.id}" aria-pressed="${c.id === fixSel}" style="min-height:0;padding:6px 8px">${esc(c.name)}${fixMoved.has(c.id) ? " ✓" : ""}</button>`).join("");
+  CAFES.forEach(c => fixMarkers[c.id] && fixMarkers[c.id].setIcon(fixLabel(c)));
+  const c = CAFES.find(x => x.id === fixSel);
+  document.getElementById("fix-sel").textContent = c ? `지금 고르는 카페: ${c.name}. 지도에서 실제 위치를 눌러주세요.` : "카페를 먼저 골라주세요.";
+}
+function initFix() {
+  if (fixMap || typeof L === "undefined") return;
+  fixMap = L.map("fixmap").setView([37.5568, 126.9375], 16);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "&copy; OpenStreetMap" }).addTo(fixMap);
+  CAFES.forEach((c, i) => {
+    const pos = c.pos || [37.5530 - Math.floor(i / 6) * 0.0006, 126.9330 + (i % 6) * 0.0012];
+    fixPos[c.id] = pos;
+    const m = L.marker(pos, { icon: fixLabel(c), draggable: true }).addTo(fixMap);
+    m.on("dragend", () => { const ll = m.getLatLng(); fixPos[c.id] = [ll.lat, ll.lng]; fixMoved.add(c.id); fixRender(); });
+    m.on("click", () => { fixSel = c.id; fixRender(); });
+    fixMarkers[c.id] = m;
+  });
+  fixMap.on("click", e => {
+    if (!fixSel) { toast("아래 목록에서 카페를 먼저 골라주세요"); return; }
+    fixPos[fixSel] = [e.latlng.lat, e.latlng.lng]; fixMarkers[fixSel].setLatLng(e.latlng); fixMoved.add(fixSel);
+    const idx = CAFES.findIndex(x => x.id === fixSel); fixSel = null; fixRender();
+  });
+  document.getElementById("fix-list").addEventListener("click", e => { const b = e.target.closest("[data-fix]"); if (!b) return; fixSel = b.dataset.fix; fixRender(); const m = fixMarkers[fixSel]; if (m) fixMap.panTo(m.getLatLng()); });
+  document.getElementById("fix-copy").addEventListener("click", () => {
+    const txt = "핀 위치\n" + CAFES.filter(c => fixMoved.has(c.id)).map(c => `${c.id} ${fixPos[c.id][0].toFixed(5)}, ${fixPos[c.id][1].toFixed(5)}`).join("\n");
+    const out = document.getElementById("fix-out"); out.value = txt; out.hidden = false;
+    if (navigator.clipboard) navigator.clipboard.writeText(txt).then(() => toast("복사했어요. Claude에게 붙여넣어 주세요"), () => { out.select(); toast("아래 글자를 길게 눌러 복사해주세요"); });
+    else { out.select(); toast("아래 글자를 길게 눌러 복사해주세요"); }
+  });
+  fixRender();
+}
 /* ---------- 화면 전환 ---------- */
 function route() {
   const h = location.hash.replace("#", "");
-  const view = h === "cafe" || h === "shinchon" ? h : "home";
+  const view = ["cafe", "shinchon", "fix"].includes(h) ? h : "home";
   document.getElementById("view-home").hidden = view !== "home";
   document.getElementById("view-cafe").hidden = view !== "cafe";
   document.getElementById("view-shinchon").hidden = view !== "shinchon";
+  document.getElementById("view-fix").hidden = view !== "fix";
   document.getElementById("topnav").hidden = view === "home";
   document.querySelectorAll("[data-nav]").forEach(a => a.dataset.nav === view ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
+  if (view === "fix") { initFix(); setTimeout(() => fixMap && fixMap.invalidateSize(), 50); }
   if (view === "shinchon") { initMap(); setTimeout(() => map && map.invalidateSize(), 50); }
   window.scrollTo(0, 0);
 }
