@@ -137,6 +137,8 @@ footer a { color: var(--muted); word-break: break-all; }
 .map-note, .unpinned { font-size: 13px; color: var(--muted); margin: 0; }
 .pin { width: 13px; height: 13px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); background: var(--c); }
 .pin-wrap { background: none; border: none; }
+.pin.auto { border-style: dashed; }
+.auto-note { font-size: 11px; color: var(--muted); margin-top: 6px; }
 .gray-tiles { filter: grayscale(1) contrast(.85) brightness(1.08); }
 .leaflet-popup-content-wrapper { border-radius: 0; }
 .leaflet-popup-content { margin: 12px 14px; font-family: var(--sans); font-size: 13.5px; line-height: 1.5; color: #111; min-width: 210px; }
@@ -627,6 +629,7 @@ function popupHtml(c) {
     <div class="now"><i class="dot" style="--c:${COL[r ? r.level : "none"]}"></i>${statusLine(r)}</div>
     <ul><li>콘센트: ${esc(c.plug[0])}</li><li>소음: ${esc(c.quiet[0])}</li><li>영업: ${esc(c.hours[0])}</li><li>${esc(c.limit)}</li></ul>
     <div class="report"><button data-id="${c.id}" data-lv="free">여유</button><button data-id="${c.id}" data-lv="mid">보통</button><button data-id="${c.id}" data-lv="full">꽉 참</button></div>
+    ${c.auto ? '<div class="auto-note">위치는 카카오 검색으로 자동으로 찾은 거라 조금 다를 수 있어요.</div>' : ""}
     <div style="margin-top:6px"><a href="${mapUrl(c)}" target="_blank" rel="noopener">네이버 지도 ↗</a></div></div>`;
 }
 function pinIcon(c) {
@@ -661,6 +664,32 @@ function initKakao() {
     ov.setMap(map); kPins[c.id] = el;
   });
   paintKakaoPins();
+  autoLocate();
+}
+function addKakaoPin(c) {
+  const km = kakao.maps, el = document.createElement("div");
+  el.className = "pin" + (c.auto ? " auto" : ""); el.title = c.name; el.style.cursor = "pointer";
+  el.addEventListener("click", ev => { ev.stopPropagation(); openKakaoInfo(c); });
+  new km.CustomOverlay({ position: new km.LatLng(c.pos[0], c.pos[1]), content: el, yAnchor: 0.5, xAnchor: 0.5, zIndex: 5 }).setMap(map);
+  kPins[c.id] = el; paintKakaoPins();
+}
+// 위치를 모르는 카페는 카카오 장소 검색으로 자동으로 찾아서 핀을 꽂아요
+function autoLocate() {
+  const sv = kakao.maps.services; if (!sv) return;
+  const ps = new sv.Places(), gc = new sv.Geocoder(), myMap = map, area = AREA;
+  const ctr = new kakao.maps.LatLng(AREAS[area].center[0], AREAS[area].center[1]);
+  const place = (c, y, x) => {
+    if (map !== myMap || c.pos) return;
+    c.pos = [+y, +x]; c.auto = true; addKakaoPin(c); listUnpinned();
+  };
+  const realAddr = c => /\d/.test(c.addr) && !/확인/.test(c.addr) ? c.addr.split(",")[0].replace(/\s*\(.*$/, "").trim() : "";
+  CAFES.filter(c => !c.pos && inArea(c)).forEach((c, i) => setTimeout(() => {
+    if (map !== myMap) return;
+    const byAddr = () => { const a = realAddr(c); if (a) gc.addressSearch(a, (r, st) => { if (st === sv.Status.OK && r[0]) place(c, r[0].y, r[0].x); }); };
+    ps.keywordSearch(c.name, (r, st) => {
+      if (st === sv.Status.OK && r[0]) place(c, r[0].y, r[0].x); else byAddr();
+    }, { location: ctr, radius: 2500, category_group_code: "CE7", sort: sv.SortBy.DISTANCE });
+  }, i * 120));
 }
 function openKakaoInfo(c) {
   const box = document.createElement("div");
@@ -696,7 +725,7 @@ function initMap() {
   const fallback = () => { if (done) return; done = true; kakaoFailed = true; initLeaflet(); };
   const timer = setTimeout(fallback, 5000);
   const sc = document.createElement("script");
-  sc.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false`;
+  sc.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false&libraries=services`;
   sc.onload = () => {
     if (!window.kakao || !kakao.maps) return fallback();
     kakao.maps.load(() => { if (done) return; done = true; clearTimeout(timer); try { initKakao(); } catch (e) { console.warn(e); map = null; initLeaflet(); } });
