@@ -113,6 +113,8 @@ button { font-family: inherit; }
 .q { color: var(--muted); font-size: 10.5px; }
 .report { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: auto; }
 .report button { border: 1px solid var(--ink); background: transparent; padding: 7px 0; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--ink); }
+.report button small { display: block; font-size: 10px; font-weight: 400; margin-top: 2px; letter-spacing: 0; }
+.report button:hover small { color: inherit; }
 .report button:hover { background: var(--ink); color: var(--paper); }
 .back .links { display: flex; justify-content: space-between; font-size: 11.5px; }
 .back .links button { border: none; background: none; padding: 0; font-size: 11.5px; text-decoration: underline; cursor: pointer; color: var(--muted); }
@@ -182,7 +184,8 @@ footer a { color: var(--muted); word-break: break-all; }
   .back h3 { font-size: 20px; }
   .back .now { font-size: 15px; }
   .q { font-size: 11.5px; }
-  .report button { min-height: 46px; font-size: 15px; }
+  .report button { min-height: 52px; font-size: 15px; }
+  .report button small { font-size: 11px; }
   .back .links, .back .links button { font-size: 13px; }
   .back .links a, .back .links button { padding: 10px 0; }
   .rack-ctrl { font-size: 13px; }
@@ -255,7 +258,7 @@ footer a { color: var(--muted); word-break: break-all; }
     <span>끌어서 돌리고, 카드를 눌러 뒤집기</span>
     <button id="next" aria-label="오른쪽으로 돌리기">→</button>
   </div>
-  <div class="legend"><span><i class="dot" style="--c: var(--free)"></i>자리 여유</span><span><i class="dot" style="--c: var(--mid)"></i>보통</span><span><i class="dot" style="--c: var(--full)"></i>꽉 참</span><span><i class="dot"></i>정보 없음</span></div>
+  <div class="legend"><span><i class="dot" style="--c: var(--free)"></i>자리 여유 (빈자리 5개 이상)</span><span><i class="dot" style="--c: var(--mid)"></i>보통 (2~4자리)</span><span><i class="dot" style="--c: var(--full)"></i>꽉 참 (0~1자리)</span><span><i class="dot"></i>정보 없음</span></div>
 
   <footer>
     <div><b>정보 표시 방법:</b> 표시 없음: 출처에서 확인, <span class="tagq">리뷰</span> 방문자 후기 기준, <span class="tagq">추정</span> 오래됐거나 불확실, <span class="tagq">미확인</span> 아직 모름, <span class="tagq">제보</span> 신촌 학생 제보. 가기 전에 지도 앱에서 영업시간을 한 번 더 확인하세요.</div>
@@ -595,7 +598,7 @@ function backHtml(c) {
     <dt>이용</dt><dd>${esc(c.limit)}</dd></dl>
     <div class="q">${esc(c.addr)}</div>
     <div class="report">
-      <button data-id="${c.id}" data-lv="free">여유</button><button data-id="${c.id}" data-lv="mid">보통</button><button data-id="${c.id}" data-lv="full">꽉 참</button>
+      <button data-id="${c.id}" data-lv="free">여유<small>빈자리 5+</small></button><button data-id="${c.id}" data-lv="mid">보통<small>2~4자리</small></button><button data-id="${c.id}" data-lv="full">꽉 참<small>0~1자리</small></button>
     </div>
     <div class="links"><a href="${mapUrl(c)}" target="_blank" rel="noopener">네이버 지도 ↗</a><button class="close" type="button">다시 뒤집기</button></div></div>`;
 }
@@ -722,7 +725,7 @@ function popupHtml(c) {
   return `<div class="pop"><h3>${esc(c.name)}</h3>
     <div class="now"><i class="dot" style="--c:${COL[r ? r.level : "none"]}"></i>${statusLine(r)}</div>
     <ul><li>콘센트: ${esc(c.plug[0])}</li><li>소음: ${esc(c.quiet[0])}</li><li>영업: ${esc(c.hours[0])}</li><li>${esc(c.limit)}</li></ul>
-    <div class="report"><button data-id="${c.id}" data-lv="free">여유</button><button data-id="${c.id}" data-lv="mid">보통</button><button data-id="${c.id}" data-lv="full">꽉 참</button></div>
+    <div class="report"><button data-id="${c.id}" data-lv="free">여유<small>빈자리 5+</small></button><button data-id="${c.id}" data-lv="mid">보통<small>2~4자리</small></button><button data-id="${c.id}" data-lv="full">꽉 참<small>0~1자리</small></button></div>
     ${c.auto ? '<div class="auto-note">위치는 카카오 검색으로 자동으로 찾은 거라 조금 다를 수 있어요.</div>' : ""}
     <div style="margin-top:6px"><a href="${mapUrl(c)}" target="_blank" rel="noopener">네이버 지도 ↗</a></div></div>`;
 }
