@@ -1,5 +1,9 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>신촌 카공 지도</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="vendor/leaflet.css">
 <style>
@@ -113,7 +117,7 @@ button { font-family: inherit; }
 .legend span { display: inline-flex; align-items: center; gap: 5px; }
 footer { font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--line); padding-top: 16px; }
 footer a { color: var(--muted); word-break: break-all; }
-.tagq { font-size: 10.5px; border: 1px solid var(--line); padding: 0 4px; margin-left: 2px; }
+.tagq { white-space: nowrap; font-size: 10.5px; border: 1px solid var(--line); padding: 0 4px; margin-left: 2px; }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; font-size: 14px; z-index: 1000; white-space: nowrap; }
 
 .fb { display: flex; flex-direction: column; gap: 16px; max-width: 560px; }
@@ -151,6 +155,44 @@ footer a { color: var(--muted); word-break: break-all; }
 .pop ul { margin: 4px 0 8px; padding-left: 16px; }
 
 @media (prefers-reduced-motion: reduce) { .tag .flip { transition: none; } }
+/* ---- 폰 화면 ---- */
+@media (max-width: 520px) {
+  .topnav { font-size: 14px; gap: 16px; }
+  .topnav a { padding: 12px 0; }
+  .area-switch { font-size: 14px; gap: 18px; margin-top: -14px; }
+  .area-switch a { padding: 12px 0; }
+  .notice { font-size: 15px; }
+  .fbox { font-size: 13px; min-height: 58px; }
+  .count { font-size: 13px; }
+  .rack { height: 580px; }
+  .tag { left: -120px; width: 240px; height: 490px; }
+  .face { padding: 18px 16px; }
+  .front .no { font-size: 13px; }
+  .front .nm { font-size: 36px; }
+  .front .nm.long { font-size: 29px; }
+  .front .nm.xlong { font-size: 25px; }
+  .front .st { font-size: 14px; }
+  .back { font-size: 13.5px; gap: 8px; }
+  .back h3 { font-size: 20px; }
+  .back .now { font-size: 15px; }
+  .q { font-size: 11.5px; }
+  .report button { min-height: 46px; font-size: 15px; }
+  .back .links, .back .links button { font-size: 13px; }
+  .back .links a, .back .links button { padding: 10px 0; }
+  .rack-ctrl { font-size: 13px; }
+  .rack-ctrl button { width: 56px; height: 46px; font-size: 20px; }
+  .legend { font-size: 13px; }
+  footer { font-size: 13px; }
+  footer a { display: inline-block; padding: 4px 0; }
+  .home-cap { font-size: 14px; }
+  .home-hint { font-size: 13px; }
+  .dots { gap: 4px; }
+  .dots button { width: 12px; height: 12px; margin: 8px; }
+  .pop .report button, .kpop .report button { min-height: 44px; font-size: 14px; }
+  .kpop .kclose { font-size: 24px; padding: 6px 10px; top: 0; right: 0; }
+  .fb-kinds label { padding: 14px 8px; font-size: 15px; }
+}
+
 </style>
 
 <section class="home" id="view-home" aria-label="첫 화면">
@@ -550,7 +592,8 @@ function build() {
   ring.innerHTML = shown.map((c, i) => `<div class="tag${c.id === flippedId ? " flipped" : ""}" data-id="${c.id}" data-i="${i}"><span class="hook"></span><div class="flip">${frontHtml(c, i)}${backHtml(c)}</div></div>`).join("");
   const n = shown.length;
   step = n > 0 ? 360 / Math.max(n, 6) : 30;
-  radius = Math.max(260, (210 * Math.max(n, 6)) / (2 * Math.PI));
+  const gapW = matchMedia("(max-width: 520px)").matches ? 250 : 210;
+  radius = Math.max(260, (gapW * Math.max(n, 6)) / (2 * Math.PI));
   if (!shown.some(c => c.id === flippedId)) flippedId = null;
   layout();
 }
