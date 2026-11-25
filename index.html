@@ -62,7 +62,6 @@ button { font-family: inherit; }
 .area-switch a[aria-current="page"] { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
 .home-cap { font-size: 13px; letter-spacing: .08em; margin: 0; font-weight: 500; }
 .home-hint { font-size: 12px; letter-spacing: .08em; margin: 6px 0 0; color: var(--muted); }
-@media (max-width: 520px) { .hero { aspect-ratio: 3 / 4; max-height: none; } }
 
 /* ---- CAFE LIST ---- */
 .cafe-page { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
@@ -75,6 +74,13 @@ button { font-family: inherit; }
   font-size: 12px; font-weight: 500; line-height: 1.25; padding: 10px 4px; min-height: 52px;
   display: flex; align-items: center; justify-content: center; text-align: center; word-break: keep-all;
 }
+.tools { display: flex; flex-wrap: wrap; gap: 6px; align-items: stretch; }
+.tools .filters { flex: 1 1 420px; }
+.search { flex: 0 1 200px; display: flex; }
+.search input { width: 100%; min-height: 52px; border: 1px solid var(--ink); border-radius: 0; background: transparent; color: var(--ink); font: 500 13px var(--sans); letter-spacing: .06em; padding: 0 12px; -webkit-appearance: none; appearance: none; }
+.search input::placeholder { color: var(--muted); }
+.search input:focus { outline: 2px solid var(--ink); outline-offset: -2px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .fbox[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
 .count { font-size: 12px; color: var(--muted); letter-spacing: .06em; margin: -8px 0 0; }
 
@@ -184,6 +190,8 @@ footer a { color: var(--muted); word-break: break-all; }
   .legend { font-size: 13px; }
   footer { font-size: 13px; }
   footer a { display: inline-block; padding: 4px 0; }
+  .search { flex: 1 1 100%; }
+  .search input { min-height: 48px; font-size: 16px; }
   .home-cap { font-size: 14px; }
   .home-hint { font-size: 13px; }
   .dots { gap: 4px; }
@@ -225,6 +233,7 @@ footer a { color: var(--muted); word-break: break-all; }
   <nav class="area-switch" aria-label="지역"><a href="#cafe" data-area="sinchon">SHINCHON</a><a href="#cafe-yy" data-area="yy">YEONNAM&amp;YEONHUI</a></nav>
   <p class="notice" id="notice"><b>시험기간, 가기 전에 자리부터 확인하세요.</b> 카페에 도착하면 카드를 뒤집어 지금 자리 상태를 눌러주세요. 다음 사람이 덜 헤매요. 2시간이 지난 정보는 자동으로 사라져요. <span id="ex-note">지금 보이는 자리 상태는 예시예요.</span></p>
 
+  <div class="tools">
   <div class="filters" role="group" aria-label="필터">
     <button class="fbox" id="f-seat" aria-pressed="false" data-f="seat">자리<br>여유</button>
     <button class="fbox" id="f-plug" aria-pressed="false" data-f="plug">콘센트<br>많음</button>
@@ -232,12 +241,14 @@ footer a { color: var(--muted); word-break: break-all; }
     <button class="fbox" id="f-late" aria-pressed="false" data-f="late">밤 10시<br>이후/24시</button>
     <button class="fbox" id="f-solo" aria-pressed="false" data-f="solo">1인석<br>칸막이</button>
   </div>
+  <label class="search"><span class="sr">카페 이름 검색</span><input id="q" type="search" placeholder="SEARCH" autocomplete="off" enterkeyhint="search"></label>
+  </div>
   <p class="count" id="count"></p>
 
   <div class="rack" id="rack" aria-label="카페 목록. 좌우로 끌어서 돌리고, 카드를 누르면 뒤집혀요">
     <div class="rail"></div>
     <div class="stage"><div class="ring" id="ring"></div></div>
-    <p class="empty" id="empty" hidden>조건에 맞는 카페가 없어요. 필터를 하나 꺼보세요.</p>
+    <p class="empty" id="empty" hidden>조건에 맞는 카페가 없어요. 검색어나 필터를 바꿔보세요.</p>
   </div>
   <div class="rack-ctrl">
     <button id="prev" aria-label="왼쪽으로 돌리기">←</button>
@@ -558,10 +569,13 @@ const ring = document.getElementById("ring");
 const rack = document.getElementById("rack");
 let shown = [], rot = 0, vel = 0, step = 30, radius = 300, flippedId = null, animTarget = null;
 
+let query = "";
+const norm = t => t.toLowerCase().replace(/\s+/g, "");
 function passes(c) {
   const r = current(c.id);
   if (filters.seat && !(r && r.level === "free")) return false;
   for (const k of ["plug", "quiet", "late", "solo"]) if (filters[k] && !c.f[k]) return false;
+  if (query) { const hay = norm(c.name + c.addr); if (!query.split(" ").every(w => hay.includes(norm(w)))) return false; }
   return true;
 }
 function frontHtml(c, i) {
@@ -668,6 +682,11 @@ function unflip() { flippedId = null; ring.querySelectorAll(".tag.flipped").forE
 ring.addEventListener("click", e => { if (e.target.closest(".close")) unflip(); });
 document.getElementById("prev").addEventListener("click", () => { unflip(); const i = frontIndex(); rotateTo((i - 1 + shown.length) % shown.length); });
 document.getElementById("next").addEventListener("click", () => { unflip(); const i = frontIndex(); rotateTo((i + 1) % shown.length); });
+document.getElementById("q").addEventListener("input", e => {
+  query = e.target.value.trim().replace(/\s+/g, " ");
+  flippedId = null; rot = 0; animTarget = null; vel = 0; build();
+});
+document.getElementById("q").addEventListener("keydown", e => { if (e.key === "Enter") e.target.blur(); });
 document.querySelectorAll(".fbox").forEach(btn => btn.addEventListener("click", () => {
   const k = btn.dataset.f; filters[k] = !filters[k];
   btn.setAttribute("aria-pressed", String(filters[k]));
