@@ -73,7 +73,10 @@ button { font-family: inherit; }
 .rec-title { margin: 0 0 .5em; font-size: clamp(1.9rem, 6vw, 3.2rem); font-weight: 500; letter-spacing: -0.01em; line-height: 1; color: #98FFE5; -webkit-text-stroke: 2px #111; paint-order: stroke fill; transform: scaleY(1.35); transform-origin: left top; }
 .rec-date { font-size: 12px; letter-spacing: .12em; color: var(--muted); font-weight: 500; }
 .rec .area { font-size: 13px; letter-spacing: .08em; color: var(--muted); font-weight: 500; }
-.rec h2 { margin: 4px 0 0; font-size: clamp(1.6rem, 5vw, 2.4rem); font-weight: 600; letter-spacing: -0.04em; line-height: 1.05; }
+.rec-head { margin-bottom: 10px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 8px 40px; }
+.rec-name { text-align: right; padding-bottom: 1.6em; min-width: 0; }
+@media (min-width: 721px) { .rec-head { flex-wrap: nowrap; } .rec-head > div:first-child { flex-shrink: 0; } }
+.rec h2 { margin: 6px 0 0; font-size: clamp(2.2rem, 4.4vw, 3.6rem); font-weight: 600; letter-spacing: -0.04em; line-height: 1.05; word-break: keep-all; }
 .rec h3 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.03em; }
 .rec .now { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 15px; }
 .rec .now small { font-weight: 400; color: var(--muted); font-size: 12px; }
@@ -81,7 +84,9 @@ button { font-family: inherit; }
 .rec dt { color: var(--muted); }
 .rec dd { margin: 0; min-width: 0; }
 .rec .tip { font-size: 14.5px; }
-.rec .report { max-width: 420px; }
+.rec .report { max-width: none; gap: 8px; }
+.rec .report button { min-height: 76px; font-size: 20px; }
+.rec .report button small { font-size: 13px; margin-top: 4px; }
 .rec .hintline { font-size: 12px; letter-spacing: .1em; color: var(--muted); }
 .rec .links { display: flex; flex-wrap: wrap; gap: 18px; font-size: 13px; margin-top: auto; }
 .rec .links a, .rec .links button { color: var(--ink); background: none; border: none; padding: 0; font: inherit; text-decoration: underline; cursor: pointer; }
@@ -223,7 +228,10 @@ footer a { color: var(--muted); word-break: break-all; }
   .home-hint { font-size: 13px; }
   .rec-face.has-photo { grid-template-columns: 1fr; }
   .rec-body { padding: 22px 18px 20px; }
-  .rec .report { max-width: none; }
+  .rec-name { text-align: left; padding-bottom: 0; }
+  .rec-title { margin-bottom: .45em; }
+  .rec .report button { min-height: 66px; font-size: 18px; }
+  .rec .report button small { font-size: 12px; }
   .rec .hintline { font-size: 13px; }
   .rec .links { font-size: 14px; }
   .rec .links a, .rec .links button { padding: 8px 0; }
@@ -746,8 +754,10 @@ function renderRec() {
   // 사진은 카페 정보에 photo: "img/파일이름.jpg" 를 넣으면 앞면에 자동으로 나와요
   box.innerHTML = `<div class="rec-flip">
     <div class="rec-face rec-front${c.photo ? " has-photo" : ""}" role="button" tabindex="0" aria-label="눌러서 카페 정보 보기">${photo}<div class="rec-body">
-      <div><div class="rec-date">${todayKey().replace(/-/g, ".")}</div><p class="rec-title">TODAY'S<br>RECOMMENDATION</p></div>
-      <div><div class="area">${a.name}</div><h2>${esc(c.name)}</h2></div>
+      <div class="rec-head">
+        <div><div class="rec-date">${todayKey().replace(/-/g, ".")}</div><p class="rec-title">TODAY'S<br>RECOMMENDATION</p></div>
+        <div class="rec-name"><div class="area">${a.name}</div><h2>${esc(c.name)}</h2></div>
+      </div>
       <div class="now"><i class="dot" style="--c:${COL[r ? r.level : "none"]}"></i>${statusLine(r)}</div>
       <div class="report"><button data-id="${c.id}" data-lv="free">여유<small>빈자리 5+</small></button><button data-id="${c.id}" data-lv="mid">보통<small>2~4자리</small></button><button data-id="${c.id}" data-lv="full">꽉 참<small>0~1자리</small></button></div>
       <div class="hintline">TAP TO SEE INFO ↻</div>
