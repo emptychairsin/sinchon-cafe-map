@@ -61,23 +61,30 @@ button { font-family: inherit; }
 .area-switch a { color: var(--muted); text-decoration: none; }
 .area-switch a[aria-current="page"] { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
 .home-cap { font-size: 13px; letter-spacing: .08em; margin: 0; font-weight: 500; }
-.rec { margin-top: 18px; border: 1px solid var(--ink); background: var(--paper); display: grid; grid-template-columns: 1fr; }
-.rec.has-photo { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); }
-.rec-photo { width: 100%; height: 100%; min-height: 220px; object-fit: cover; display: block; }
-.rec-body { padding: 22px 24px; display: flex; flex-direction: column; gap: 12px; }
-.rec-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 12px; font-weight: 600; letter-spacing: .12em; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
-.rec-top span:last-child { color: var(--muted); font-weight: 500; }
-.rec h2 { margin: 4px 0 0; font-size: clamp(1.8rem, 6vw, 2.8rem); font-weight: 700; letter-spacing: -0.04em; line-height: 1; }
-.rec .area { font-size: 12px; letter-spacing: .08em; color: var(--muted); }
+.rec { margin-top: 22px; perspective: 1400px; }
+.rec-flip { display: grid; transform-style: preserve-3d; transition: transform .7s cubic-bezier(.2,.7,.2,1); }
+.rec.flipped .rec-flip { transform: rotateY(180deg); }
+.rec-face { grid-area: 1 / 1; border: 1px solid var(--ink); background: var(--paper); backface-visibility: hidden; -webkit-backface-visibility: hidden; display: grid; grid-template-columns: 1fr; cursor: pointer; }
+.rec-face.has-photo { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); }
+.rec-back { transform: rotateY(180deg); }
+.rec:not(.flipped) .rec-back, .rec.flipped .rec-front { visibility: hidden; transition: visibility 0s .35s; }
+.rec-photo { width: 100%; height: 100%; min-height: 240px; object-fit: cover; display: block; }
+.rec-body { padding: 28px 28px 24px; display: flex; flex-direction: column; gap: 16px; }
+.rec-title { margin: 0; font-size: clamp(1.7rem, 5.4vw, 3rem); font-weight: 700; letter-spacing: -0.035em; line-height: .95; }
+.rec-date { font-size: 12px; letter-spacing: .12em; color: var(--muted); font-weight: 500; }
+.rec .area { font-size: 13px; letter-spacing: .08em; color: var(--muted); font-weight: 500; }
+.rec h2 { margin: 4px 0 0; font-size: clamp(1.6rem, 5vw, 2.4rem); font-weight: 600; letter-spacing: -0.04em; line-height: 1.05; }
+.rec h3 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.03em; }
 .rec .now { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 15px; }
 .rec .now small { font-weight: 400; color: var(--muted); font-size: 12px; }
-.rec dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 14px; line-height: 1.45; }
+.rec dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 14.5px; line-height: 1.45; }
 .rec dt { color: var(--muted); }
 .rec dd { margin: 0; min-width: 0; }
-.rec .tip { font-size: 14px; }
-.rec .report { max-width: 360px; margin-top: 4px; }
-.rec .links { display: flex; gap: 18px; font-size: 13px; }
-.rec .links a { color: var(--ink); }
+.rec .tip { font-size: 14.5px; }
+.rec .report { max-width: 420px; }
+.rec .hintline { font-size: 12px; letter-spacing: .1em; color: var(--muted); }
+.rec .links { display: flex; flex-wrap: wrap; gap: 18px; font-size: 13px; margin-top: auto; }
+.rec .links a, .rec .links button { color: var(--ink); background: none; border: none; padding: 0; font: inherit; text-decoration: underline; cursor: pointer; }
 .home-hint { font-size: 12px; letter-spacing: .08em; margin: 6px 0 0; color: var(--muted); }
 
 /* ---- CAFE LIST ---- */
@@ -214,12 +221,12 @@ footer a { color: var(--muted); word-break: break-all; }
   .search input { min-height: 48px; font-size: 16px; }
   .home-cap { font-size: 14px; }
   .home-hint { font-size: 13px; }
-  .rec.has-photo { grid-template-columns: 1fr; }
-  .rec-body { padding: 18px 16px; }
-  .rec dl { font-size: 14.5px; }
+  .rec-face.has-photo { grid-template-columns: 1fr; }
+  .rec-body { padding: 22px 18px 20px; }
   .rec .report { max-width: none; }
+  .rec .hintline { font-size: 13px; }
   .rec .links { font-size: 14px; }
-  .rec .links a { padding: 8px 0; }
+  .rec .links a, .rec .links button { padding: 8px 0; }
   .dots { gap: 4px; }
   .dots button { width: 12px; height: 12px; margin: 8px; }
   .pop .report button, .kpop .report button { min-height: 44px; font-size: 14px; }
@@ -735,13 +742,18 @@ function todayCafe() {
 function renderRec() {
   const box = document.getElementById("rec"); if (!box) return;
   const c = todayCafe(), r = current(c.id), a = AREAS[c.area || "sinchon"];
-  // 사진은 카페 정보에 photo: "img/파일이름.jpg" 를 넣으면 자동으로 나와요
-  box.classList.toggle("has-photo", !!c.photo);
-  box.innerHTML = (c.photo ? `<img class="rec-photo" src="${esc(c.photo)}" alt="${esc(c.name)}" loading="lazy">` : "") +
-    `<div class="rec-body">
-      <div class="rec-top"><span>TODAY'S RECOMMENDATION</span><span>${todayKey().replace(/-/g, ".")}</span></div>
+  const photo = c.photo ? `<img class="rec-photo" src="${esc(c.photo)}" alt="${esc(c.name)}" loading="lazy">` : "";
+  // 사진은 카페 정보에 photo: "img/파일이름.jpg" 를 넣으면 앞면에 자동으로 나와요
+  box.innerHTML = `<div class="rec-flip">
+    <div class="rec-face rec-front${c.photo ? " has-photo" : ""}" role="button" tabindex="0" aria-label="눌러서 카페 정보 보기">${photo}<div class="rec-body">
+      <div><div class="rec-date">${todayKey().replace(/-/g, ".")}</div><p class="rec-title">TODAY'S<br>RECOMMENDATION</p></div>
       <div><div class="area">${a.name}</div><h2>${esc(c.name)}</h2></div>
       <div class="now"><i class="dot" style="--c:${COL[r ? r.level : "none"]}"></i>${statusLine(r)}</div>
+      <div class="report"><button data-id="${c.id}" data-lv="free">여유<small>빈자리 5+</small></button><button data-id="${c.id}" data-lv="mid">보통<small>2~4자리</small></button><button data-id="${c.id}" data-lv="full">꽉 참<small>0~1자리</small></button></div>
+      <div class="hintline">TAP TO SEE INFO ↻</div>
+    </div></div>
+    <div class="rec-face rec-back" role="button" tabindex="0" aria-label="다시 뒤집기"><div class="rec-body">
+      <h3>${esc(c.name)}</h3>
       <dl><dt>콘센트</dt><dd>${esc(c.plug[0])} ${q(c.plug[1])}</dd>
       <dt>소음</dt><dd>${esc(c.quiet[0])} ${q(c.quiet[1])}</dd>
       <dt>좌석</dt><dd>${esc(c.seats[0])} ${q(c.seats[1])}</dd>
@@ -749,9 +761,9 @@ function renderRec() {
       <dt>이용</dt><dd>${esc(c.limit)}</dd>
       <dt>주소</dt><dd>${esc(c.addr)}</dd></dl>
       ${c.tip ? `<div class="tip">${esc(c.tip)}</div>` : ""}
-      <div class="report"><button data-id="${c.id}" data-lv="free">여유<small>빈자리 5+</small></button><button data-id="${c.id}" data-lv="mid">보통<small>2~4자리</small></button><button data-id="${c.id}" data-lv="full">꽉 참<small>0~1자리</small></button></div>
-      <div class="links"><a href="#${a.cafe}">CAFE LIST에서 보기</a><a href="${mapUrl(c)}" target="_blank" rel="noopener">네이버 지도 ↗</a></div>
-    </div>`;
+      <div class="links"><a href="#${a.cafe}">CAFE LIST에서 보기</a><a href="${mapUrl(c)}" target="_blank" rel="noopener">네이버 지도 ↗</a><button type="button">다시 뒤집기</button></div>
+    </div></div>
+  </div>`;
 }
 async function report(id, lv) {
   if (SHARED && recentlyReported(id)) { toast("같은 카페는 10분에 한 번만 알려줄 수 있어요"); return; }
@@ -994,6 +1006,13 @@ if (!usingExamples) document.getElementById("ex-note").hidden = true;
 if (SHARED) document.getElementById("share-note").textContent = "누군가 누른 자리 상태는 모두에게 똑같이 보여요. 같은 카페는 10분에 한 번만 알려줄 수 있어요.";
 build();
 renderRec();
+document.getElementById("rec").addEventListener("click", e => {
+  if (e.target.closest(".report button, a")) return;
+  e.currentTarget.classList.toggle("flipped");
+});
+document.getElementById("rec").addEventListener("keydown", e => {
+  if ((e.key === "Enter" || e.key === " ") && e.target.classList.contains("rec-face")) { e.preventDefault(); e.currentTarget.classList.toggle("flipped"); }
+});
 window.addEventListener("hashchange", route);
 route();
 pull();
