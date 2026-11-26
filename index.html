@@ -61,6 +61,23 @@ button { font-family: inherit; }
 .area-switch a { color: var(--muted); text-decoration: none; }
 .area-switch a[aria-current="page"] { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
 .home-cap { font-size: 13px; letter-spacing: .08em; margin: 0; font-weight: 500; }
+.rec { margin-top: 18px; border: 1px solid var(--ink); background: var(--paper); display: grid; grid-template-columns: 1fr; }
+.rec.has-photo { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); }
+.rec-photo { width: 100%; height: 100%; min-height: 220px; object-fit: cover; display: block; }
+.rec-body { padding: 22px 24px; display: flex; flex-direction: column; gap: 12px; }
+.rec-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 12px; font-weight: 600; letter-spacing: .12em; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+.rec-top span:last-child { color: var(--muted); font-weight: 500; }
+.rec h2 { margin: 4px 0 0; font-size: clamp(1.8rem, 6vw, 2.8rem); font-weight: 700; letter-spacing: -0.04em; line-height: 1; }
+.rec .area { font-size: 12px; letter-spacing: .08em; color: var(--muted); }
+.rec .now { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 15px; }
+.rec .now small { font-weight: 400; color: var(--muted); font-size: 12px; }
+.rec dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 14px; line-height: 1.45; }
+.rec dt { color: var(--muted); }
+.rec dd { margin: 0; min-width: 0; }
+.rec .tip { font-size: 14px; }
+.rec .report { max-width: 360px; margin-top: 4px; }
+.rec .links { display: flex; gap: 18px; font-size: 13px; }
+.rec .links a { color: var(--ink); }
 .home-hint { font-size: 12px; letter-spacing: .08em; margin: 6px 0 0; color: var(--muted); }
 
 /* ---- CAFE LIST ---- */
@@ -197,6 +214,12 @@ footer a { color: var(--muted); word-break: break-all; }
   .search input { min-height: 48px; font-size: 16px; }
   .home-cap { font-size: 14px; }
   .home-hint { font-size: 13px; }
+  .rec.has-photo { grid-template-columns: 1fr; }
+  .rec-body { padding: 18px 16px; }
+  .rec dl { font-size: 14.5px; }
+  .rec .report { max-width: none; }
+  .rec .links { font-size: 14px; }
+  .rec .links a { padding: 8px 0; }
   .dots { gap: 4px; }
   .dots button { width: 12px; height: 12px; margin: 8px; }
   .pop .report button, .kpop .report button { min-height: 44px; font-size: 14px; }
@@ -222,6 +245,7 @@ footer a { color: var(--muted); word-break: break-all; }
   <div class="dots" role="group" aria-label="지역 고르기"><button data-go="0" aria-label="신촌" aria-current="true"></button><button data-go="1" aria-label="연남 연희"></button></div>
   <p class="home-cap" id="home-cap"></p>
   <p class="home-hint" id="home-hint"></p>
+  <article class="rec" id="rec" aria-label="오늘의 추천 카페"></article>
 </section>
 
 <nav class="topnav" id="topnav" hidden aria-label="페이지 이동">
@@ -700,7 +724,35 @@ rack.addEventListener("wheel", e => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY
 /* ---------- 제보 ---------- */
 let toastTimer;
 function toast(msg) { const el = document.getElementById("toast"); el.textContent = msg; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 1800); }
-function refreshAll() { const k = rot; build(); rot = k; layout(); refreshPins(); }
+function refreshAll() { const k = rot; build(); rot = k; layout(); refreshPins(); renderRec(); }
+// 오늘의 추천: 날짜(한국 시간)로 정해서 같은 날엔 모두 같은 카페가 나와요
+function todayKey() { return new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10); }
+function todayCafe() {
+  const key = todayKey(); let h = 2166136261;
+  for (const ch of key) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
+  return CAFES[(h >>> 0) % CAFES.length];
+}
+function renderRec() {
+  const box = document.getElementById("rec"); if (!box) return;
+  const c = todayCafe(), r = current(c.id), a = AREAS[c.area || "sinchon"];
+  // 사진은 카페 정보에 photo: "img/파일이름.jpg" 를 넣으면 자동으로 나와요
+  box.classList.toggle("has-photo", !!c.photo);
+  box.innerHTML = (c.photo ? `<img class="rec-photo" src="${esc(c.photo)}" alt="${esc(c.name)}" loading="lazy">` : "") +
+    `<div class="rec-body">
+      <div class="rec-top"><span>TODAY'S RECOMMENDATION</span><span>${todayKey().replace(/-/g, ".")}</span></div>
+      <div><div class="area">${a.name}</div><h2>${esc(c.name)}</h2></div>
+      <div class="now"><i class="dot" style="--c:${COL[r ? r.level : "none"]}"></i>${statusLine(r)}</div>
+      <dl><dt>콘센트</dt><dd>${esc(c.plug[0])} ${q(c.plug[1])}</dd>
+      <dt>소음</dt><dd>${esc(c.quiet[0])} ${q(c.quiet[1])}</dd>
+      <dt>좌석</dt><dd>${esc(c.seats[0])} ${q(c.seats[1])}</dd>
+      <dt>영업</dt><dd>${esc(c.hours[0])} ${q(c.hours[1])}</dd>
+      <dt>이용</dt><dd>${esc(c.limit)}</dd>
+      <dt>주소</dt><dd>${esc(c.addr)}</dd></dl>
+      ${c.tip ? `<div class="tip">${esc(c.tip)}</div>` : ""}
+      <div class="report"><button data-id="${c.id}" data-lv="free">여유<small>빈자리 5+</small></button><button data-id="${c.id}" data-lv="mid">보통<small>2~4자리</small></button><button data-id="${c.id}" data-lv="full">꽉 참<small>0~1자리</small></button></div>
+      <div class="links"><a href="#${a.cafe}">CAFE LIST에서 보기</a><a href="${mapUrl(c)}" target="_blank" rel="noopener">네이버 지도 ↗</a></div>
+    </div>`;
+}
 async function report(id, lv) {
   if (SHARED && recentlyReported(id)) { toast("같은 카페는 10분에 한 번만 알려줄 수 있어요"); return; }
   if (usingExamples) { reports = {}; usingExamples = false; document.getElementById("ex-note").hidden = true; }
@@ -941,6 +993,7 @@ paintSlide(0);
 if (!usingExamples) document.getElementById("ex-note").hidden = true;
 if (SHARED) document.getElementById("share-note").textContent = "누군가 누른 자리 상태는 모두에게 똑같이 보여요. 같은 카페는 10분에 한 번만 알려줄 수 있어요.";
 build();
+renderRec();
 window.addEventListener("hashchange", route);
 route();
 pull();
