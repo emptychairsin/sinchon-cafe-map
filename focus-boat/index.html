@@ -266,14 +266,17 @@ body {
   }
 
   // pose: idle | sign(귀항 시그니처) | sad
-  function petSvg(id, pose = 'idle', outfit = null) {
+  function petSvg(id, pose = 'idle', outfit = null, n = 0) {
     let s = '';
+    const face = pose === 'sign' || pose === 'catch';
+    const col = { mong: '#e9eef2', dal: '#b98c63', moon: '#f0a092' }[id];
+    if (pose === 'catch') s += `<path d="M11 42 Q3 22 11 3 Q17 1 18 6 Q13 24 17 38Z" fill="${col}" stroke="${OL}" stroke-width="2"/><path d="M49 42 Q57 22 49 3 Q43 1 42 6 Q47 24 43 38Z" fill="${col}" stroke="${OL}" stroke-width="2"/>`;
     const body = 'M8 46 C6 26 16 14 30 14 C44 14 54 26 52 46 C51 58 42 62 30 62 C18 62 9 58 8 46Z';
     if (id === 'mong') {
       const c = '#e9eef2';
       if (pose === 'sign') s += `<path d="M12 40 Q2 30 6 23 Q13 26 16 36" fill="${c}" stroke="${OL}" stroke-width="2"/><path d="M48 40 Q58 30 54 23 Q47 26 44 36" fill="${c}" stroke="${OL}" stroke-width="2"/>`;
       s += `<path d="${body}" fill="${c}" stroke="${OL}" stroke-width="2.2"/><ellipse cx="18" cy="26" rx="2" ry="1.4" fill="#c9d3db"/><ellipse cx="44" cy="52" rx="2.4" ry="1.6" fill="#c9d3db"/><ellipse cx="40" cy="22" rx="1.4" ry="1" fill="#c9d3db"/>`;
-      if (pose === 'sign') {
+      if (face) {
         s += `<circle cx="22" cy="35" r="3.6" fill="${OL}"/><circle cx="38" cy="35" r="3.6" fill="${OL}"/><circle cx="23.2" cy="33.7" r="1.3" fill="#fff"/><circle cx="39.2" cy="33.7" r="1.3" fill="#fff"/><circle cx="21" cy="36.5" r=".6" fill="#fff"/><circle cx="37" cy="36.5" r=".6" fill="#fff"/>`;
         s += `<path d="M18 39 q-1.5 4 0 6 q1.5 -2 0 -6Z M42 39 q-1.5 4 0 6 q1.5 -2 0 -6Z" fill="#8fc3e6"/>`;
         s += `<path d="M26 43 Q30 48 34 43" fill="#e98b92" stroke="${OL}" stroke-width="1.6"/>`;
@@ -283,20 +286,20 @@ body {
         s += dotEyes(35) + `<path d="M26.5 43.5 Q28.3 45.8 30 43.5 Q31.7 45.8 33.5 43.5" fill="none" stroke="${OL}" stroke-width="1.6" stroke-linecap="round"/>`;
       }
       s += `<ellipse cx="30" cy="40.6" rx="2.2" ry="1.5" fill="${OL}"/>` + blush(13, 42) + blush(41, 42);
-      if (pose !== 'sign') s += `<path d="M10 48 Q2 52 5 58 Q11 57 14 52" fill="${c}" stroke="${OL}" stroke-width="2"/><path d="M50 48 Q58 52 55 58 Q49 57 46 52" fill="${c}" stroke="${OL}" stroke-width="2"/>`;
-      else s += fishSvg(30, 55, 1.15, '#e9a46a');
+      if (!face) s += `<path d="M10 48 Q2 52 5 58 Q11 57 14 52" fill="${c}" stroke="${OL}" stroke-width="2"/><path d="M50 48 Q58 52 55 58 Q49 57 46 52" fill="${c}" stroke="${OL}" stroke-width="2"/>`;
+      else if (pose === 'sign') s += fishSvg(30, 55, 1.15, '#e9a46a');
     }
     if (id === 'dal') {
       const c = '#b98c63', f = '#f4e3ca';
       if (pose === 'sign') s += `<path d="M13 40 Q4 26 9 16 Q15 18 18 34" fill="${c}" stroke="${OL}" stroke-width="2"/><path d="M47 40 Q56 26 51 16 Q45 18 42 34" fill="${c}" stroke="${OL}" stroke-width="2"/>` + fishSvg(30, 8, 1.3, '#8fb3c9');
       s += `<circle cx="15" cy="21" r="4.6" fill="${c}" stroke="${OL}" stroke-width="2"/><circle cx="45" cy="21" r="4.6" fill="${c}" stroke="${OL}" stroke-width="2"/><circle cx="15" cy="21" r="2" fill="#8e6646"/><circle cx="45" cy="21" r="2" fill="#8e6646"/>`;
       s += `<path d="${body}" fill="${c}" stroke="${OL}" stroke-width="2.2"/><ellipse cx="30" cy="40" rx="15" ry="11" fill="${f}"/>`;
-      if (pose === 'sign') s += `<path d="M19 32 l4 3 l-4 3 M41 32 l-4 3 l4 3" fill="none" stroke="${OL}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M25.5 42.5 Q30 49 34.5 42.5Z" fill="#e98b92" stroke="${OL}" stroke-width="1.5"/>`;
+      if (face) s += `<path d="M19 32 l4 3 l-4 3 M41 32 l-4 3 l4 3" fill="none" stroke="${OL}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M25.5 42.5 Q30 49 34.5 42.5Z" fill="#e98b92" stroke="${OL}" stroke-width="1.5"/>`;
       else if (pose === 'sad') s += dotEyes(36) + `<path d="M27 45.5 Q30 43.5 33 45.5" fill="none" stroke="${OL}" stroke-width="1.6" stroke-linecap="round"/>`;
       else s += dotEyes(34.5) + `<path d="M30 41.5 v1.5 M26.8 43.6 Q28.4 45.6 30 43 Q31.6 45.6 33.2 43.6" fill="none" stroke="${OL}" stroke-width="1.6" stroke-linecap="round"/>`;
       s += `<path d="M27.2 38 h5.6 q-.8 3 -2.8 3 q-2 0 -2.8 -3Z" fill="${OL}"/>` + blush(13, 42) + blush(41, 42);
       s += `<circle cx="16" cy="44" r=".7" fill="${OL}"/><circle cx="44" cy="44" r=".7" fill="${OL}"/>`;
-      if (pose !== 'sign') s += `<ellipse cx="30" cy="54" rx="5" ry="3.4" fill="#e7d3e0" stroke="${OL}" stroke-width="1.5"/><path d="M27 54 h6 M28 52.5 h4" stroke="${OL}" stroke-width=".8"/><circle cx="23" cy="53" r="3.6" fill="${c}" stroke="${OL}" stroke-width="1.8"/><circle cx="37" cy="53" r="3.6" fill="${c}" stroke="${OL}" stroke-width="1.8"/>`;
+      if (!face) s += `<ellipse cx="30" cy="54" rx="5" ry="3.4" fill="#e7d3e0" stroke="${OL}" stroke-width="1.5"/><path d="M27 54 h6 M28 52.5 h4" stroke="${OL}" stroke-width=".8"/><circle cx="23" cy="53" r="3.6" fill="${c}" stroke="${OL}" stroke-width="1.8"/><circle cx="37" cy="53" r="3.6" fill="${c}" stroke="${OL}" stroke-width="1.8"/>`;
     }
     if (id === 'moon') {
       const c = '#f0a092';
@@ -304,12 +307,19 @@ body {
       s += `<path d="M10 40 Q9 54 6 58 Q12 61 15 54 Q18 62 23 56 Q26 62 30 57 Q34 62 37 56 Q42 62 45 54 Q48 61 54 58 Q51 54 50 40 Z" fill="${c}" stroke="${OL}" stroke-width="2" stroke-linejoin="round"/>`;
       if (pose === 'sign') s += `<path d="M11 42 Q4 38 6 33 M49 42 Q56 38 54 33" fill="none" stroke="${OL}" stroke-width="2"/>`;
       s += `<path d="M9 42 C7 18 18 7 30 7 C42 7 53 18 51 42 Q30 48 9 42Z" fill="${c}" stroke="${OL}" stroke-width="2.2"/><circle cx="20" cy="17" r="1.6" fill="#f7c3b8"/><circle cx="24" cy="13" r="1" fill="#f7c3b8"/>`;
-      if (pose === 'sign') s += `<rect x="16" y="26" width="11" height="7" rx="2.5" fill="${OL}"/><rect x="33" y="26" width="11" height="7" rx="2.5" fill="${OL}"/><path d="M27 28.5 h6" stroke="${OL}" stroke-width="1.6"/><path d="M18 27.5 l3 0" stroke="#fff" stroke-width="1" opacity=".7"/><path d="M27 37 Q31 39.5 34 36" fill="none" stroke="${OL}" stroke-width="1.6" stroke-linecap="round"/>`;
+      if (face) s += `<rect x="16" y="26" width="11" height="7" rx="2.5" fill="${OL}"/><rect x="33" y="26" width="11" height="7" rx="2.5" fill="${OL}"/><path d="M27 28.5 h6" stroke="${OL}" stroke-width="1.6"/><path d="M18 27.5 l3 0" stroke="#fff" stroke-width="1" opacity=".7"/><path d="M27 37 Q31 39.5 34 36" fill="none" stroke="${OL}" stroke-width="1.6" stroke-linecap="round"/>`;
       else if (pose === 'sad') s += `<path d="M18 30 h7 M35 30 h7" stroke="${OL}" stroke-width="2" stroke-linecap="round"/><path d="M28 38 h4" stroke="${OL}" stroke-width="1.6" stroke-linecap="round"/>`;
       else s += `<path d="M18 29.5 h7.5 M34.5 29.5 h7.5" stroke="${OL}" stroke-width="2" stroke-linecap="round"/><path d="M19 29.5 a2.9 2.9 0 0 0 5.8 0Z M35.2 29.5 a2.9 2.9 0 0 0 5.8 0Z" fill="${OL}"/><ellipse cx="30" cy="37" rx="1.8" ry="1.4" fill="none" stroke="${OL}" stroke-width="1.5"/>`;
       s += blush(13, 35) + blush(41, 35);
     }
     if (outfit) s += outfitSvg(id, outfit);
+    if (pose === 'catch') { // 물고기 담긴 그물을 머리 위로 번쩍
+      const colors = ['#8fb3c9', '#e9a46a', '#a9bfcc', '#d98c7a', '#9fc4b1'], k = Math.min(n, 12);
+      let f = '';
+      for (let i = 0; i < k; i++) { const r = Math.floor(i / 4), c = i % 4; f += fishSvg(16 + c * 9.5 + (r % 2) * 3, -1 - r * 7.5, .8, colors[(i * 7) % 5], i % 2 === 0); }
+      s += `<g>${f}<path d="M8 -26 Q3 8 30 10 Q57 8 52 -26 Q30 -32 8 -26Z" fill="url(#netp)" stroke="#6d5a48" stroke-width="1.8"/><path d="M8 -26 Q30 -32 52 -26" stroke="#6d5a48" stroke-width="2.6" fill="none"/></g>`;
+      s += `<circle cx="12" cy="1" r="4.6" fill="${col}" stroke="${OL}" stroke-width="2"/><circle cx="48" cy="1" r="4.6" fill="${col}" stroke="${OL}" stroke-width="2"/>`;
+    }
     return s;
   }
 
@@ -413,16 +423,8 @@ body {
     s += `<path d="M112 40 V6" stroke="#5b6670" stroke-width="2.6"/><path d="M104 16 H120" stroke="#5b6670" stroke-width="2"/><rect x="106" y="20" width="12" height="3" rx="1.5" fill="#5b6670"/>`;
     s += `<g transform="translate(113 4)">${flagSvg(bank.flag)}</g>`;
     // 줄과 그물
-    if (mode === 'home' && caught > 0) {
-      const n = Math.min(caught, 16), colors = ['#8fb3c9', '#e9a46a', '#a9bfcc', '#d98c7a', '#9fc4b1'];
-      let fish = '';
-      for (let i = 0; i < n; i++) {
-        const row = Math.floor(i / 4), col = i % 4;
-        fish += fishSvg(18 + col * 9 + (row % 2) * 3, 85 - row * 7, .85, colors[(i * 7) % colors.length], i % 2 === 0);
-      }
-      const top = 85 - Math.ceil(n / 4) * 7 - 4;
-      s += `<path d="M6 44 Q10 ${top - 10} 33 ${top - 3}" stroke="#6d5a48" stroke-width="1.4" fill="none"/>`;
-      s += `<g>${fish}<path d="M11 ${top} Q7 92 32 93 Q58 92 55 ${top} Q33 ${top - 6} 11 ${top}Z" fill="url(#netp)" stroke="#6d5a48" stroke-width="1.6"/><path d="M11 ${top} Q33 ${top - 6} 55 ${top}" stroke="#6d5a48" stroke-width="2.4" fill="none"/></g>`;
+    if (mode === 'home') {
+      s += `<path d="M6 44 Q4 60 10 70" stroke="#6d5a48" stroke-width="1.4" fill="none"/>`;
     } else if (mode === 'sail' || mode === 'quit' || mode === 'returning') {
       s += `<path d="M6 44 Q0 90 -12 128" stroke="#6d5a48" stroke-width="1.4" fill="none" stroke-dasharray="4 2"/>`;
     }
@@ -434,7 +436,9 @@ body {
     // 2번째 항해원은 조타실 지붕 위, 1번째는 뱃머리, 선장은 가운데 앞
     if (boarded && crew[1]) s += `<g transform="translate(66 -8) scale(.72)"><g${anim}>${petSvg(crew[1], pose, bank.wear[crew[1]])}</g></g>`;
     if (boarded && crew[0]) s += `<g transform="translate(178 40) scale(.72)"><g${anim}>${petSvg(crew[0], pose, bank.wear[crew[0]])}</g></g>`;
-    if (boarded) s += `<g transform="translate(132 37) scale(.8)"><g${anim}>${petSvg(cap, pose, bank.wear[cap])}</g></g>`;
+    const capPose = pose === 'sign' && caught > 0 ? 'catch' : pose;
+    const capT = capPose === 'catch' ? 'translate(124 25) scale(1)' : 'translate(132 37) scale(.8)';
+    if (boarded) s += `<g transform="${capT}"><g${anim}>${petSvg(cap, capPose, bank.wear[cap], caught)}</g></g>`;
     // 선체
     s += `<path d="M12 90 L228 82 Q224 108 204 128 L42 128 Q22 116 12 90Z" fill="#2f5574" stroke="#24384a" stroke-width="1.6" stroke-linejoin="round"/>`;
     s += `<path d="M12 90 L228 82 Q226 96 220 106 L22 112 Q15 102 12 90Z" fill="url(#hullG)" stroke="#3b4954" stroke-width="1.4" stroke-linejoin="round"/>`;
@@ -575,7 +579,7 @@ body {
     // 말풍선 기준점: 선장 머리 위
     let ax, ay;
     if (mode === 'dock') { ax = geo.pierW * 0.42; ay = geo.deckY - 56 * ds; }
-    else { const bx = boatFlipped ? 240 - 156 : 156; ax = p.x + bx * p.s; ay = p.y + 44 * p.s; }
+    else { const bx = boatFlipped ? 240 - 154 : 154; ax = p.x + bx * p.s; ay = p.y + (mode === 'home' && !gaveUpLast && caught > 0 ? -6 : 44) * p.s; }
     const bw = bubble.offsetWidth, bh = bubble.offsetHeight;
     const left = clamp(ax - 30, 8, geo.W - bw - 8), top = Math.max(6, ay - bh - 12);
     bubble.style.transform = `translate(${left}px, ${top}px)`;
