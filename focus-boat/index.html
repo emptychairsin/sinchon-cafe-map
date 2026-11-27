@@ -12,241 +12,224 @@
   font-display: swap;
   src: url("PretendardVariable.woff2") format("woff2-variations");
 }
-/* 한 화면 앱: 위는 원근감 있는 바다(배가 멀어질수록 작아지며 수평선으로), 아래는 조작 패널. 담백한 연회색 한 가지 테마 */
+/* 위젯: 연회색 바탕 가운데 작은 카드 하나. 위는 미니 바다, 아래는 타이머와 버튼 하나. 나머지는 눌러야 열림 */
 :root {
   --bg: #eceef0;
-  --card: #f8f9fa;
+  --card: #ffffff;
+  --soft: #f3f5f6;
   --ink: #2a2f34;
-  --mute: #7b838a;
-  --line: #d5dade;
+  --mute: #828a91;
+  --line: #e1e5e8;
   --accent: #2f5574;
   --font: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   color-scheme: light;
 }
 [hidden] { display: none !important; }
-html, body { height: 100%; }
+html { min-height: 100%; }
 body {
-  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font);
-  display: flex; flex-direction: column; overflow-x: hidden;
+  margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); font-family: var(--font);
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  padding-block: 28px 32px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  box-sizing: border-box;
 }
-header {
-  display: flex; justify-content: space-between; align-items: center; gap: 12px;
-  padding-block: 14px 10px;
-  padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px));
-}
-.brand { font-weight: 800; letter-spacing: .14em; font-size: 13px; }
-.head-right { display: flex; align-items: center; gap: 10px; }
-.wallet {
-  display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 15px;
-  font-variant-numeric: tabular-nums; background: var(--card); border: 1px solid var(--line);
-  border-radius: 999px; padding: 5px 12px 5px 9px;
-}
-.wallet svg { width: 22px; height: 14px; }
-.wallet.pop { animation: pop .5s; }
-@keyframes pop { 40% { transform: scale(1.15); } }
+.top { width: 100%; max-width: 360px; display: flex; justify-content: space-between; align-items: baseline; }
+.brand { font-weight: 800; letter-spacing: .14em; font-size: 12px; }
+.app-name { font-size: 12px; color: var(--mute); }
+.note { max-width: 360px; font-size: 12.5px; color: var(--mute); text-align: center; line-height: 1.5; margin: 0; }
 
-/* 바다 장면 */
-.scene { position: relative; flex: 1 1 auto; min-height: 260px; overflow: hidden; background: #dfe6ec; }
+.widget {
+  width: 100%; max-width: 360px; background: var(--card); border-radius: 22px; overflow: hidden;
+  box-shadow: 0 1px 2px rgba(30,40,50,.06), 0 12px 32px rgba(30,40,50,.08);
+  display: flex; flex-direction: column;
+}
+
+/* 미니 바다 */
+.scene { position: relative; height: 210px; flex: 0 0 auto; overflow: hidden; background: #dfe6ec; }
 .scene canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .boat { position: absolute; left: 0; top: 0; width: 240px; height: 132px; transform-origin: 0 0; will-change: transform; }
 .boat svg { width: 240px; height: 132px; display: block; overflow: visible; }
 .dock-pet { position: absolute; left: 0; top: 0; width: 60px; height: 64px; transform-origin: 0 0; overflow: visible; }
 .bubble {
-  position: absolute; left: 0; top: 0; width: max-content; max-width: min(250px, 66vw);
-  background: #fff; color: var(--ink); border: 1px solid #d9dee2;
-  border-radius: 14px; padding: 9px 13px; font-size: 14.5px; line-height: 1.45; font-weight: 600;
-  box-shadow: 0 6px 18px rgba(30,45,60,.10); transition: opacity .25s;
+  position: absolute; left: 0; top: 0; width: max-content; max-width: 210px;
+  background: #fff; color: var(--ink); border-radius: 12px; padding: 7px 11px;
+  font-size: 12.5px; line-height: 1.45; font-weight: 600;
+  box-shadow: 0 4px 14px rgba(30,45,60,.14); transition: opacity .25s;
 }
 .bubble b { font-weight: 800; }
-.bubble::after {
-  content: ""; position: absolute; left: var(--tail, 26px); top: 100%; border: 8px solid transparent; border-top-color: #fff;
-}
+.bubble::after { content: ""; position: absolute; left: var(--tail, 22px); top: 100%; border: 7px solid transparent; border-top-color: #fff; }
 .bubble.fade { opacity: 0; }
 .bounce { animation: bounce .7s ease-in-out infinite alternate; }
 @keyframes bounce { to { translate: 0 -5px; } }
-.mini-hud { display: none; }
+.wallet {
+  position: absolute; right: 10px; top: 10px;
+  display: inline-flex; align-items: center; gap: 5px; font-weight: 700; font-size: 13px;
+  font-variant-numeric: tabular-nums; background: rgba(255,255,255,.85); border-radius: 999px; padding: 4px 10px 4px 8px;
+  backdrop-filter: blur(4px);
+}
+.wallet svg { width: 18px; height: 12px; }
+.wallet.pop { animation: pop .5s; }
+@keyframes pop { 40% { transform: scale(1.15); } }
 
-/* 패널 */
-.panel {
-  flex: 0 0 auto; border-top: 1px solid var(--line); background: var(--bg);
-  padding-block: 18px calc(20px + env(safe-area-inset-bottom, 0px));
-  padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px));
-  max-height: 58vh; overflow-y: auto;
-}
-.inner { max-width: 680px; margin: 0 auto; display: grid; gap: 14px; }
-.label { font-size: 13px; color: var(--mute); }
-.row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; justify-content: space-between; }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.chip {
-  font: inherit; font-size: 15px; font-weight: 600; color: var(--ink);
-  background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 9px 16px; cursor: pointer;
-}
-.chip[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
-.custom { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; color: var(--mute); }
-.custom input {
-  width: 64px; font: inherit; font-size: 15px; font-weight: 600; color: var(--ink); text-align: center;
-  background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 8px 6px;
-}
-.pets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+/* 카드 아래쪽 */
+.body { padding: 14px 16px 16px; display: grid; gap: 12px; }
+.step { display: grid; gap: 12px; }
+.pets { display: flex; gap: 8px; align-items: center; }
 .pet-card {
-  font: inherit; color: var(--ink); text-align: left; cursor: pointer;
-  background: var(--card); border: 1.5px solid var(--line); border-radius: 14px; padding: 10px 12px 12px;
-  display: grid; gap: 2px; align-content: start;
+  font: inherit; cursor: pointer; padding: 0; width: 46px; height: 46px; border-radius: 50%;
+  background: var(--soft); border: 2px solid transparent; display: grid; place-items: center;
 }
-.pet-card svg { width: 56px; height: 60px; overflow: visible; }
-.pet-card b { font-size: 15px; }
-.pet-card span { font-size: 12.5px; color: var(--mute); line-height: 1.4; }
+.pet-card svg { width: 38px; height: 40px; overflow: visible; }
 .pet-card[aria-pressed="true"] { border-color: var(--ink); background: #fff; }
+.pet-info { margin-left: 4px; min-width: 0; }
+.pet-info b { display: block; font-size: 14px; }
+.pet-info span { display: block; font-size: 12px; color: var(--mute); }
+.chips { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.chip {
+  font: inherit; font-size: 13.5px; font-weight: 600; color: var(--ink); cursor: pointer;
+  background: var(--soft); border: 0; border-radius: 999px; padding: 7px 12px;
+}
+.chip[aria-pressed="true"] { background: var(--ink); color: #fff; }
+.custom input {
+  width: 52px; font: inherit; font-size: 13.5px; font-weight: 600; color: var(--ink); text-align: center;
+  background: var(--soft); border: 0; border-radius: 999px; padding: 7px 4px;
+}
 .btn {
-  font: inherit; font-weight: 700; font-size: 16px; cursor: pointer;
-  background: var(--accent); color: #fff; border: 0; border-radius: 12px; padding: 13px 22px;
+  font: inherit; font-weight: 700; font-size: 15px; cursor: pointer; width: 100%;
+  background: var(--accent); color: #fff; border: 0; border-radius: 12px; padding: 12px 16px;
 }
-.btn:disabled { opacity: .4; cursor: default; }
-.btn.ghost { background: transparent; color: var(--mute); border: 1px solid var(--line); font-size: 13px; padding: 9px 14px; font-weight: 600; }
-.btn.small { font-size: 14px; padding: 9px 12px; }
-.chip:focus-visible, .btn:focus-visible, .pet-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.timer { font-size: clamp(42px, 9vw, 60px); font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1; }
-.status { font-size: 15px; color: var(--mute); }
-.track { position: relative; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.btn:disabled { opacity: .35; cursor: default; }
+.links { display: flex; justify-content: space-between; gap: 8px; }
+.link {
+  font: inherit; font-size: 12.5px; font-weight: 600; color: var(--mute); background: none; border: 0; padding: 4px 2px; cursor: pointer;
+}
+.link:hover { color: var(--ink); }
+.chip:focus-visible, .btn:focus-visible, .pet-card:focus-visible, .link:focus-visible, .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.timer-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; }
+.timer { font-size: 44px; font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums; line-height: 1; }
+.status { font-size: 13px; color: var(--mute); margin-top: 4px; }
+.fish { font-size: 13px; font-weight: 700; text-align: right; }
+.track { position: relative; height: 5px; background: var(--soft); border-radius: 3px; overflow: hidden; }
 .track i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--accent); border-radius: 3px; }
-.result-title { font-size: 21px; font-weight: 800; text-wrap: balance; }
-.fish { font-size: 15px; }
-.shop-sec { display: grid; gap: 8px; }
-.shop-sec h3 { margin: 4px 0 0; font-size: 14px; font-weight: 800; }
-.shop { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
-.item {
-  background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px 12px;
-  display: grid; gap: 4px; align-content: start;
-}
-.item svg { width: 44px; height: 40px; overflow: visible; }
-.item b { font-size: 14.5px; }
-.item span { font-size: 12.5px; color: var(--mute); line-height: 1.4; }
-.item .btn { margin-top: 4px; }
-.item.on { border-color: var(--ink); background: #fff; }
-@media (max-width: 520px) {
-  .pet-card span { display: none; }
-  .pet-card { justify-items: center; text-align: center; }
-}
+.title { font-size: 17px; font-weight: 800; text-wrap: balance; }
+.sub { font-size: 13px; color: var(--mute); line-height: 1.5; }
+.btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.btn.ghost { background: var(--soft); color: var(--ink); }
 
-/* 작은 창(PIP) 모드 */
-.popped {
-  flex: 1 1 auto; min-height: 300px; display: grid; place-content: center; gap: 12px; text-align: center;
-  color: var(--mute); font-size: 15px; background: #e3e8ec;
+/* 상점 */
+.tabs { display: flex; gap: 4px; background: var(--soft); border-radius: 10px; padding: 3px; }
+.tab { flex: 1; font: inherit; font-size: 13px; font-weight: 700; color: var(--mute); background: none; border: 0; border-radius: 8px; padding: 7px 4px; cursor: pointer; }
+.tab[aria-selected="true"] { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+.shop { display: grid; gap: 6px; max-height: 230px; overflow-y: auto; }
+.item { display: flex; align-items: center; gap: 10px; padding: 6px 4px; border-bottom: 1px solid var(--line); }
+.item:last-child { border-bottom: 0; }
+.item svg { width: 34px; height: 32px; flex: 0 0 auto; overflow: visible; }
+.item .txt { flex: 1; min-width: 0; }
+.item b { display: block; font-size: 13.5px; }
+.item span { display: block; font-size: 11.5px; color: var(--mute); }
+.buy {
+  font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; white-space: nowrap;
+  background: var(--accent); color: #fff; border: 0; border-radius: 999px; padding: 6px 11px;
 }
-.pip body { display: block; }
-.pip .scene { position: fixed; inset: 0; min-height: 0; }
-.pip .mini-hud {
-  display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
-  position: absolute; left: 10px; right: 10px; bottom: 8px; font-variant-numeric: tabular-nums; color: #fff;
-  text-shadow: 0 1px 3px rgba(20,40,60,.4);
-}
-.pip .mini-hud b { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
-.pip .mini-hud span { font-size: 13px; font-weight: 700; }
-.pip .bubble { font-size: 12px; padding: 6px 10px; max-width: 190px; border-radius: 10px; }
+.buy.owned { background: var(--soft); color: var(--ink); }
+.buy:disabled { opacity: .35; cursor: default; }
+.state { font-size: 12px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+
+.popped { width: 100%; max-width: 360px; background: var(--card); border-radius: 22px; padding: 28px 16px; text-align: center; color: var(--mute); font-size: 14px; display: grid; gap: 12px; box-sizing: border-box; }
+.popped .btn { width: auto; justify-self: center; }
+
+/* 작은 창(PIP) 안 */
+.pip body { padding: 0; display: block; background: var(--card); }
+.pip .widget { max-width: none; border-radius: 0; box-shadow: none; min-height: 100vh; }
+.pip .scene { height: 170px; }
+.pip .body { padding: 10px 12px 12px; gap: 10px; }
+.pip .timer { font-size: 36px; }
+.pip .pip-hide { display: none !important; }
 @media (prefers-reduced-motion: reduce) { .bounce { animation: none; } }
 </style>
 </head>
 <body>
 
-<header>
-  <span class="brand">EMPTY CHAIR</span>
-  <span class="head-right">
-    <button class="btn ghost" id="pipBtn" hidden>작은 창으로 띄우기</button>
+<div class="top"><span class="brand">EMPTY CHAIR</span><span class="app-name">집중 원양어선</span></div>
+
+<div class="widget" id="widget">
+  <div class="scene" id="scene">
+    <canvas id="sea"></canvas>
+    <svg class="dock-pet" id="dockPet" viewBox="0 0 60 64" aria-hidden="true"></svg>
+    <div class="boat" id="boat"><svg viewBox="0 0 240 132" id="boatSvg" aria-label="펫이 탄 고기잡이 배"></svg></div>
+    <div class="bubble" id="bubble"></div>
     <span class="wallet" id="wallet" title="모은 물고기">
       <svg viewBox="0 0 22 14" aria-hidden="true"><path d="M2 7 Q8 0 15 7 Q8 14 2 7 Z" fill="#2f5574"/><path d="M14 7 L21 2 V12 Z" fill="#2f5574"/><circle cx="6" cy="6" r="1.2" fill="#fff"/></svg>
       <span id="walletNum">0</span>
     </span>
-  </span>
-</header>
+  </div>
 
-<div class="scene" id="scene">
-  <canvas id="sea"></canvas>
-  <svg class="dock-pet" id="dockPet" viewBox="0 0 60 64" aria-hidden="true"></svg>
-  <div class="boat" id="boat"><svg viewBox="0 0 240 132" id="boatSvg" aria-label="펫이 탄 고기잡이 배"></svg></div>
-  <div class="bubble" id="bubble"></div>
-  <div class="mini-hud"><b id="miniTimer">대기 중</b><span id="miniFish"></span></div>
+  <div class="body">
+    <!-- 1. 출항 전 -->
+    <div class="step" id="stepPick">
+      <div class="pets" id="pets"></div>
+      <div class="chips" id="chips">
+        <button class="chip" data-min="15" aria-pressed="false">15분</button>
+        <button class="chip" data-min="25" aria-pressed="true">25분</button>
+        <button class="chip" data-min="50" aria-pressed="false">50분</button>
+        <button class="chip" data-min="90" aria-pressed="false">90분</button>
+        <label class="custom"><input id="customMin" type="number" min="1" max="300" placeholder="직접" inputmode="numeric" aria-label="직접 입력(분)"></label>
+      </div>
+      <button class="btn" id="go">25분 출항시키기</button>
+      <div class="links">
+        <button class="link" id="openShop">상점</button>
+        <span class="status" id="pickHint"></span>
+        <button class="link pip-hide" id="pipBtn" hidden>작은 창으로 띄우기</button>
+      </div>
+    </div>
+
+    <!-- 2. 항해 중 -->
+    <div class="step" id="stepSail" hidden>
+      <div class="timer-row">
+        <div><div class="timer" id="timer">25:00</div><div class="status" id="sailStatus">먼 바다로 나가는 중</div></div>
+        <div class="fish" id="fishNow">물고기 0마리</div>
+      </div>
+      <div class="track"><i id="bar"></i></div>
+      <div class="links">
+        <button class="link" id="quit">일찍 돌아오기</button>
+        <button class="link" id="ff" hidden>시안용 빨리감기</button>
+      </div>
+    </div>
+
+    <!-- 2-1. 일찍 돌아오기 확인 -->
+    <div class="step" id="stepQuit" hidden>
+      <div><div class="title">정말 배를 돌릴까요?</div><div class="sub">지금 돌아오면 그물 속 물고기의 절반만 가져와요.</div></div>
+      <div class="btn-row"><button class="btn ghost" id="quitYes">돌아오기</button><button class="btn" id="quitNo">계속 집중</button></div>
+    </div>
+
+    <!-- 3. 귀항 -->
+    <div class="step" id="stepDone" hidden>
+      <div><div class="title" id="doneTitle"></div><div class="sub" id="doneText"></div></div>
+      <div class="btn-row"><button class="btn ghost" id="doneShop">상점</button><button class="btn" id="again">다시 출항</button></div>
+    </div>
+
+    <!-- 상점 -->
+    <div class="step" id="stepShop" hidden>
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" data-tab="crew" aria-selected="true">항해원</button>
+        <button class="tab" role="tab" data-tab="flag" aria-selected="false">깃발</button>
+        <button class="tab" role="tab" data-tab="outfit" aria-selected="false">옷</button>
+      </div>
+      <div class="shop" id="shopList"></div>
+      <div class="links">
+        <button class="link" id="closeShop">돌아가기</button>
+        <button class="link" id="demoFish" hidden>시안용 물고기 +30</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="popped" id="popped" hidden>
-  <div>펫이 작은 창으로 나가서 화면 위에 떠 있어요.<br>다른 탭에서 공부해도 계속 보여요.</div>
-  <div><button class="btn ghost" id="pipBack">다시 데려오기</button></div>
+  <div>위젯이 작은 창으로 나가서 화면 위에 떠 있어요.<br>다른 탭에서 공부해도 계속 보여요.</div>
+  <button class="btn ghost" id="pipBack">다시 데려오기</button>
 </div>
 
-<div class="panel">
-  <!-- 1. 선장 고르기 + 시간 고르기 -->
-  <div class="inner" id="stepPick">
-    <div class="label">누구를 원양어선에 태울까요?</div>
-    <div class="pets" id="pets"></div>
-    <div class="label">몇 분 동안 태울까요? 시간이 끝나야 돌아올 수 있어요.</div>
-    <div class="chips" id="chips">
-      <button class="chip" data-min="15" aria-pressed="false">15분</button>
-      <button class="chip" data-min="25" aria-pressed="true">25분</button>
-      <button class="chip" data-min="50" aria-pressed="false">50분</button>
-      <button class="chip" data-min="90" aria-pressed="false">90분</button>
-      <label class="custom">직접 <input id="customMin" type="number" min="1" max="300" placeholder="40" inputmode="numeric"> 분</label>
-    </div>
-    <div class="row">
-      <span class="status" id="pickHint"></span>
-      <span class="chips">
-        <button class="btn ghost" id="openShop">상점</button>
-        <button class="btn" id="go">출항시키기</button>
-      </span>
-    </div>
-  </div>
-
-  <!-- 2. 항해 중 -->
-  <div class="inner" id="stepSail" hidden>
-    <div class="row">
-      <div>
-        <div class="timer" id="timer">25:00</div>
-        <div class="status" id="sailStatus">부두를 떠나는 중</div>
-      </div>
-      <div class="fish" id="fishNow">그물 속 물고기 0마리</div>
-    </div>
-    <div class="track"><i id="bar"></i></div>
-    <div class="row">
-      <span class="label">끝까지 버티면 물고기를 전부 가져와요.</span>
-      <span class="chips">
-        <button class="btn ghost" id="ff" hidden>시안용 빨리감기</button>
-        <button class="btn ghost" id="quit">일찍 돌아오기</button>
-      </span>
-    </div>
-  </div>
-
-  <!-- 2-1. 일찍 돌아오기 확인 -->
-  <div class="inner" id="stepQuit" hidden>
-    <div class="result-title">정말 배를 돌릴까요?</div>
-    <div class="label">지금 돌아오면 그물 속 물고기의 절반만 가져와요.</div>
-    <div class="row">
-      <button class="btn ghost" id="quitYes">그래도 돌아오기</button>
-      <button class="btn" id="quitNo">계속 집중하기</button>
-    </div>
-  </div>
-
-  <!-- 3. 귀항 -->
-  <div class="inner" id="stepDone" hidden>
-    <div class="result-title" id="doneTitle"></div>
-    <div class="fish" id="doneText"></div>
-    <div class="row">
-      <button class="btn ghost" id="doneShop">상점 가기</button>
-      <button class="btn" id="again">다시 출항하기</button>
-    </div>
-  </div>
-
-  <!-- 상점 -->
-  <div class="inner" id="stepShop" hidden>
-    <div class="row">
-      <span class="label">물고기로 배와 친구들을 꾸며요.</span>
-      <span class="chips">
-        <button class="btn ghost" id="demoFish" hidden>시안용 물고기 +30</button>
-        <button class="btn ghost" id="closeShop">돌아가기</button>
-      </span>
-    </div>
-    <div class="shop-sec"><h3>항해원 구인</h3><div class="shop" id="shopCrew"></div></div>
-    <div class="shop-sec"><h3>깃발</h3><div class="shop" id="shopFlag"></div></div>
-    <div class="shop-sec"><h3 id="outfitTitle">옷</h3><div class="shop" id="shopOutfit"></div></div>
-  </div>
-</div>
+<p class="note" id="note">크롬이나 엣지에서 "작은 창으로 띄우기"를 누르면 다른 탭이나 프로그램 위에도 떠 있어요.</p>
 
 <script>
 (() => {
@@ -614,7 +597,9 @@ header {
 
   /* ---------- 1단계: 선장, 시간 ---------- */
   function renderPets() {
-    $('pets').innerHTML = ORDER.map((id) => `<button class="pet-card" data-pet="${id}" aria-pressed="${id === bank.captain}"><svg viewBox="0 0 60 64">${petSvg(id, 'idle', bank.wear[id])}</svg><b>${PETS[id].name}</b><span>${PETS[id].kind}. ${PETS[id].desc}</span></button>`).join('');
+    const c = PETS[bank.captain];
+    $('pets').innerHTML = ORDER.map((id) => `<button class="pet-card" data-pet="${id}" aria-pressed="${id === bank.captain}" aria-label="${PETS[id].name}"><svg viewBox="0 2 60 62">${petSvg(id, 'idle', bank.wear[id])}</svg></button>`).join('') +
+      `<div class="pet-info"><b>${c.name}</b><span>${c.kind}, ${c.desc}</span></div>`;
   }
   $('pets').addEventListener('click', (e) => {
     const b = e.target.closest('[data-pet]'); if (!b) return;
@@ -625,7 +610,8 @@ header {
   const chips = [...document.querySelectorAll('.chip')];
   function updateHint() {
     const crew = crewOf(bank.captain).map((x) => PETS[x].name);
-    $('pickHint').textContent = `${minutes}분 뒤에 돌아와요. 예상 물고기 ${Math.floor(minutes / BASE_EVERY * rate())}마리` + (crew.length ? ` (항해원 ${crew.join(', ')})` : '');
+    $('pickHint').textContent = `예상 물고기 ${Math.floor(minutes / BASE_EVERY * rate())}마리` + (crew.length ? `, 항해원 ${crew.length}명` : '');
+    $('go').textContent = `${minutes}분 출항시키기`;
   }
   const lenLine = (m) => LINES[bank.captain][m <= 15 ? 'short' : m <= 50 ? 'mid' : 'long'];
   chips.forEach((c) => c.addEventListener('click', () => {
@@ -684,8 +670,7 @@ header {
     $('timer').textContent = fmt(endAt - simNow);
     $('bar').style.width = (progress * 100) + '%';
     $('sailStatus').textContent = progress < 0.5 ? '먼 바다로 나가는 중' : '부두로 돌아오는 중';
-    $('fishNow').textContent = `그물 속 물고기 ${n}마리`;
-    $('miniTimer').textContent = fmt(endAt - simNow); $('miniFish').textContent = `물고기 ${n}마리`;
+    $('fishNow').textContent = `물고기 ${n}마리`;
     const ph = mode === 'sail' && phaseLine(progress);
     if (ph && ph[0] !== lastLine) { lastLine = ph[0]; say(pick(ph[1])); }
     if (progress >= 1) arrive(false);
@@ -717,9 +702,8 @@ header {
     saveBank(); renderWallet(true); renderBoat();
     const L = LINES[bank.captain];
     lastLine = ''; say(gaveUp ? L.giveup(caught) : L.done(caught));
-    $('miniTimer').textContent = '도착!'; $('miniFish').textContent = `물고기 +${caught}`;
-    $('doneTitle').textContent = gaveUp ? '일찍 돌아왔어요' : `${Math.round(total / 60000)}분 항해 끝, 무사히 돌아왔어요!`;
-    $('doneText').textContent = `물고기 ${caught}마리를 받았어요. 지금 모은 물고기는 ${bank.fish}마리예요.` + (!gaveUp && bank.todayCount >= 2 ? ` 오늘 ${bank.todayCount}번째 항해예요.` : '');
+    $('doneTitle').textContent = gaveUp ? '일찍 돌아왔어요' : `${Math.round(total / 60000)}분 항해 끝!`;
+    $('doneText').textContent = `물고기 ${caught}마리를 받았어요. 모은 물고기 ${bank.fish}마리` + (!gaveUp && bank.todayCount >= 2 ? `, 오늘 ${bank.todayCount}번째 항해` : '');
     show('stepDone');
   }
 
@@ -731,29 +715,36 @@ header {
   $('again').addEventListener('click', () => backToDock(LINES[bank.captain].hello));
 
   /* ---------- 상점 ---------- */
-  const itemBtn = (label, attrs, disabled) => `<button class="btn small" ${attrs} ${disabled ? 'disabled' : ''}>${label}</button>`;
+  let shopTab = 'crew';
+  const buyBtn = (label, attrs, disabled, owned) => `<button class="buy${owned ? ' owned' : ''}" ${attrs} ${disabled ? 'disabled' : ''}>${label}</button>`;
+  const row = (icon, name, desc, right, vb = '0 2 60 62') => `<div class="item"><svg viewBox="${vb}">${icon}</svg><div class="txt"><b>${name}</b>${desc ? `<span>${desc}</span>` : ''}</div>${right}</div>`;
   function renderShop() {
     const cap = bank.captain;
-    const others = ORDER.filter((x) => x !== cap);
-    $('shopCrew').innerHTML = others.map((id, i) => {
-      const hired = i < bank.crew, next = i === bank.crew, cost = CREW_COST[i];
-      return `<div class="item ${hired ? 'on' : ''}"><svg viewBox="0 0 60 64">${petSvg(id, 'idle', bank.wear[id])}</svg><b>${PETS[id].name} 구인</b><span>${PETS[id].kind}. 물고기를 50% 더 잡아요</span>` +
-        (hired ? '<span>승선 중</span>' : next ? itemBtn(`물고기 ${cost}마리`, `data-crew="${i}"`, bank.fish < cost) : '<span>앞 항해원부터 구인해요</span>') + `</div>`;
-    }).join('');
-    $('shopFlag').innerHTML = Object.entries(FLAGS).map(([id, f]) => {
-      const own = bank.flags.includes(id), on = bank.flag === id;
-      return `<div class="item ${on ? 'on' : ''}"><svg viewBox="-4 -4 36 26">${flagSvg(id)}</svg><b>${f.name}</b>` +
-        (on ? '<span>달려 있어요</span>' : own ? itemBtn('달기', `data-flag="${id}"`) : itemBtn(`물고기 ${f.cost}마리`, `data-flag="${id}"`, bank.fish < f.cost)) + `</div>`;
-    }).join('');
-    $('outfitTitle').textContent = `${PETS[cap].name} 옷 (선장을 바꾸면 다른 친구에게도 입힐 수 있어요)`;
-    $('shopOutfit').innerHTML = Object.entries(OUTFITS).map(([id, o]) => {
-      const own = bank.outfits.includes(id), on = bank.wear[cap] === id;
-      return `<div class="item ${on ? 'on' : ''}"><svg viewBox="0 0 60 64">${petSvg(cap, 'idle', id)}</svg><b>${o.name}</b>` +
-        (on ? itemBtn('벗기기', `data-wear="${id}"`) : own ? itemBtn('입히기', `data-wear="${id}"`) : itemBtn(`물고기 ${o.cost}마리`, `data-wear="${id}"`, bank.fish < o.cost)) + `</div>`;
-    }).join('');
+    document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === shopTab)));
+    let h = '';
+    if (shopTab === 'crew') {
+      h = ORDER.filter((x) => x !== cap).map((id, i) => {
+        const hired = i < bank.crew, next = i === bank.crew, cost = CREW_COST[i];
+        return row(petSvg(id, 'idle', bank.wear[id]), `${PETS[id].name} 구인`, '같이 타면 물고기 50% 더',
+          hired ? '<span class="state">승선 중</span>' : next ? buyBtn(`${cost}마리`, `data-crew="${i}"`, bank.fish < cost) : '<span class="state" style="color:var(--mute)">다음 차례</span>');
+      }).join('');
+    } else if (shopTab === 'flag') {
+      h = Object.entries(FLAGS).map(([id, f]) => {
+        const own = bank.flags.includes(id), on = bank.flag === id;
+        return row(flagSvg(id), f.name, '', on ? '<span class="state">달려 있음</span>' : own ? buyBtn('달기', `data-flag="${id}"`, false, true) : buyBtn(`${f.cost}마리`, `data-flag="${id}"`, bank.fish < f.cost), '-4 -6 36 28');
+      }).join('');
+    } else {
+      h = Object.entries(OUTFITS).map(([id, o]) => {
+        const own = bank.outfits.includes(id), on = bank.wear[cap] === id;
+        return row(petSvg(cap, 'idle', id), o.name, on ? `${PETS[cap].name} 착용 중` : '',
+          on ? buyBtn('벗기기', `data-wear="${id}"`, false, true) : own ? buyBtn('입히기', `data-wear="${id}"`, false, true) : buyBtn(`${o.cost}마리`, `data-wear="${id}"`, bank.fish < o.cost), '0 -6 60 70');
+      }).join('');
+    }
+    $('shopList').innerHTML = h;
   }
+  document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => { shopTab = t.dataset.tab; renderShop(); }));
   $('stepShop').addEventListener('click', (e) => {
-    const b = e.target.closest('button'); if (!b || b.disabled) return;
+    const b = e.target.closest('.buy'); if (!b || b.disabled) return;
     const cap = bank.captain;
     if (b.dataset.crew) {
       const i = +b.dataset.crew, cost = CREW_COST[i];
@@ -787,13 +778,13 @@ header {
   $('demoFish').addEventListener('click', () => { bank.fish += 30; saveBank(); renderWallet(true); renderShop(); });
 
   /* ---------- 작은 창 (Document Picture-in-Picture) ---------- */
-  const sceneHome = document.createComment('scene');
-  scene.before(sceneHome);
-  if ('documentPictureInPicture' in window) $('pipBtn').hidden = false;
+  const widget = $('widget'), widgetHome = document.createComment('widget');
+  widget.before(widgetHome);
+  if ('documentPictureInPicture' in window) $('pipBtn').hidden = false; else $('note').hidden = true;
   function restartLoop() { try { rafWin.cancelAnimationFrame(raf); } catch (e) {} lastReal = performance.now(); frame(); }
   async function openPip() {
     if (pipWin) return;
-    try { pipWin = await window.documentPictureInPicture.requestWindow({ width: 340, height: 240 }); }
+    try { pipWin = await window.documentPictureInPicture.requestWindow({ width: 340, height: 330 }); }
     catch (e) { pipWin = null; say('여기선 작은 창이 안 열려요.<br>배포된 사이트를 크롬이나 엣지로 열어주세요.'); return; }
     const d = pipWin.document, fontUrl = new URL('PretendardVariable.woff2', location.href).href;
     document.querySelectorAll('style').forEach((st) => {
@@ -802,10 +793,10 @@ header {
       d.head.append(c);
     });
     d.title = '집중 원양어선'; d.documentElement.classList.add('pip');
-    d.body.append(scene);
+    d.body.append(widget);
     $('popped').hidden = false; $('pipBtn').textContent = '작은 창 열림';
     pipWin.addEventListener('pagehide', () => {
-      sceneHome.after(scene); $('popped').hidden = true; $('pipBtn').textContent = '작은 창으로 띄우기';
+      widgetHome.after(widget); $('popped').hidden = true; $('pipBtn').textContent = '작은 창으로 띄우기';
       pipWin = null; restartLoop();
     });
     restartLoop();
