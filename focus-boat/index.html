@@ -12,589 +12,815 @@
   font-display: swap;
   src: url("PretendardVariable.woff2") format("woff2-variations");
 }
-/* 한 화면 앱: 위는 바다 장면(왼쪽 부두에서 오른쪽 먼 바다로 갔다가 돌아옴), 아래는 조작 패널 */
+/* 위젯: 연회색 바탕 가운데 작은 카드 하나. 위는 미니 바다, 아래는 타이머와 버튼 하나. 나머지는 눌러야 열림 */
 :root {
   --bg: #eceef0;
-  --sky: #e4e7ea;
-  --sea: #c9d3db;
-  --sea-deep: #b4c1cc;
-  --ink: #2b2f33;
-  --mute: #7c848b;
-  --line: #d3d8dd;
-  --card: #f7f8f9;
-  --accent: #3d5a73;
-  --hat: #f2c94c;
-  --boat: #8a5a3b;
-  --boat-dark: #6b4329;
-  --dock: #a7a29a;
+  --card: #ffffff;
+  --soft: #f3f5f6;
+  --ink: #2a2f34;
+  --mute: #828a91;
+  --line: #e1e5e8;
+  --accent: #2f5574;
   --font: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-}
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #1d2126; --sky: #222830; --sea: #2c3a47; --sea-deep: #24313d; --ink: #e8ebee; --mute: #98a1a9;
-  --line: #36404a; --card: #262c33; --accent: #9fbbd2; --dock: #5d5953; color-scheme: dark;
-} }
-:root[data-theme="dark"] {
-  --bg: #1d2126; --sky: #222830; --sea: #2c3a47; --sea-deep: #24313d; --ink: #e8ebee; --mute: #98a1a9;
-  --line: #36404a; --card: #262c33; --accent: #9fbbd2; --dock: #5d5953; color-scheme: dark;
+  color-scheme: light;
 }
 [hidden] { display: none !important; }
-html, body { height: 100%; }
+html { min-height: 100%; }
 body {
-  margin: 0;
-  background: var(--bg); color: var(--ink); font-family: var(--font);
-  display: flex; flex-direction: column; overflow-x: hidden;
+  margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); font-family: var(--font);
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  padding-block: 28px 32px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  box-sizing: border-box;
 }
-header {
-  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
-  padding-block: 18px 6px;
-  padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px));
+.top { width: 100%; max-width: 360px; display: flex; justify-content: space-between; align-items: baseline; }
+.brand { font-weight: 800; letter-spacing: .14em; font-size: 12px; }
+.app-name { font-size: 12px; color: var(--mute); }
+.note { max-width: 360px; font-size: 12.5px; color: var(--mute); text-align: center; line-height: 1.5; margin: 0; }
+
+.widget {
+  width: 100%; max-width: 360px; background: var(--card); border-radius: 22px; overflow: hidden;
+  box-shadow: 0 1px 2px rgba(30,40,50,.06), 0 12px 32px rgba(30,40,50,.08);
+  display: flex; flex-direction: column;
 }
-.brand { font-weight: 800; letter-spacing: .14em; font-size: 13px; }
-.sub { color: var(--mute); font-size: 13px; }
+
+/* 미니 바다 */
+.scene { position: relative; height: 210px; flex: 0 0 auto; overflow: hidden; background: #dfe6ec; }
+.scene canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.boat { position: absolute; left: 0; top: 0; width: 240px; height: 132px; transform-origin: 0 0; will-change: transform; }
+.boat svg { width: 240px; height: 132px; display: block; overflow: visible; }
+.dock-pet { position: absolute; left: 0; top: 0; width: 60px; height: 64px; transform-origin: 0 0; overflow: visible; }
+.bubble {
+  position: absolute; left: 0; top: 0; width: max-content; max-width: 210px;
+  background: #fff; color: var(--ink); border-radius: 12px; padding: 7px 11px;
+  font-size: 12.5px; line-height: 1.45; font-weight: 600;
+  box-shadow: 0 4px 14px rgba(30,45,60,.14); transition: opacity .25s;
+}
+.bubble b { font-weight: 800; }
+.bubble::after { content: ""; position: absolute; left: var(--tail, 22px); top: 100%; border: 7px solid transparent; border-top-color: #fff; }
+.bubble.fade { opacity: 0; }
+.bounce { animation: bounce .7s ease-in-out infinite alternate; }
+@keyframes bounce { to { translate: 0 -5px; } }
 .wallet {
-  display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 15px;
-  font-variant-numeric: tabular-nums; background: var(--card); border: 1px solid var(--line);
-  border-radius: 999px; padding: 5px 12px 5px 9px;
+  position: absolute; right: 10px; top: 10px;
+  display: inline-flex; align-items: center; gap: 5px; font-weight: 700; font-size: 13px;
+  font-variant-numeric: tabular-nums; background: rgba(255,255,255,.85); border-radius: 999px; padding: 4px 10px 4px 8px;
+  backdrop-filter: blur(4px);
 }
-.wallet svg { width: 22px; height: 14px; }
+.wallet svg { width: 18px; height: 12px; }
 .wallet.pop { animation: pop .5s; }
 @keyframes pop { 40% { transform: scale(1.15); } }
-.head-right { display: flex; align-items: center; gap: 12px; }
-@media (max-width: 520px) { .sub { display: none; } }
+
+/* 카드 아래쪽 */
+.body { padding: 14px 16px 16px; display: grid; gap: 12px; }
+.step { display: grid; gap: 12px; }
+.pets { display: flex; gap: 8px; align-items: center; }
+.pet-card {
+  font: inherit; cursor: pointer; padding: 0; width: 46px; height: 46px; border-radius: 50%;
+  background: var(--soft); border: 2px solid transparent; display: grid; place-items: center;
+}
+.pet-card svg { width: 38px; height: 40px; overflow: visible; }
+.pet-card[aria-pressed="true"] { border-color: var(--ink); background: #fff; }
+.pet-info { margin-left: 4px; min-width: 0; }
+.pet-info b { display: block; font-size: 14px; }
+.pet-info span { display: block; font-size: 12px; color: var(--mute); }
+.chips { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.chip {
+  font: inherit; font-size: 13.5px; font-weight: 600; color: var(--ink); cursor: pointer;
+  background: var(--soft); border: 0; border-radius: 999px; padding: 7px 12px;
+}
+.chip[aria-pressed="true"] { background: var(--ink); color: #fff; }
+.custom input {
+  width: 52px; font: inherit; font-size: 13.5px; font-weight: 600; color: var(--ink); text-align: center;
+  background: var(--soft); border: 0; border-radius: 999px; padding: 7px 4px;
+}
+.btn {
+  font: inherit; font-weight: 700; font-size: 15px; cursor: pointer; width: 100%;
+  background: var(--accent); color: #fff; border: 0; border-radius: 12px; padding: 12px 16px;
+}
+.btn:disabled { opacity: .35; cursor: default; }
+.links { display: flex; justify-content: space-between; gap: 8px; }
+.link {
+  font: inherit; font-size: 12.5px; font-weight: 600; color: var(--mute); background: none; border: 0; padding: 4px 2px; cursor: pointer;
+}
+.link:hover { color: var(--ink); }
+.chip:focus-visible, .btn:focus-visible, .pet-card:focus-visible, .link:focus-visible, .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.timer-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; }
+.timer { font-size: 44px; font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums; line-height: 1; }
+.status { font-size: 13px; color: var(--mute); margin-top: 4px; }
+.fish { font-size: 13px; font-weight: 700; text-align: right; }
+.track { position: relative; height: 5px; background: var(--soft); border-radius: 3px; overflow: hidden; }
+.track i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--accent); border-radius: 3px; }
+.title { font-size: 17px; font-weight: 800; text-wrap: balance; }
+.sub { font-size: 13px; color: var(--mute); line-height: 1.5; }
+.btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.btn.ghost { background: var(--soft); color: var(--ink); }
 
 /* 상점 */
-.shop { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
-.item {
-  background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px;
-  display: grid; gap: 4px; align-content: start;
+.tabs { display: flex; gap: 4px; background: var(--soft); border-radius: 10px; padding: 3px; }
+.tab { flex: 1; font: inherit; font-size: 13px; font-weight: 700; color: var(--mute); background: none; border: 0; border-radius: 8px; padding: 7px 4px; cursor: pointer; }
+.tab[aria-selected="true"] { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+.shop { display: grid; gap: 6px; max-height: 230px; overflow-y: auto; }
+.item { display: flex; align-items: center; gap: 10px; padding: 6px 4px; border-bottom: 1px solid var(--line); }
+.item:last-child { border-bottom: 0; }
+.item svg { width: 34px; height: 32px; flex: 0 0 auto; overflow: visible; }
+.item .txt { flex: 1; min-width: 0; }
+.item b { display: block; font-size: 13.5px; }
+.item span { display: block; font-size: 11.5px; color: var(--mute); }
+.buy {
+  font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; white-space: nowrap;
+  background: var(--accent); color: #fff; border: 0; border-radius: 999px; padding: 6px 11px;
 }
-.item b { font-size: 15px; }
-.item span { font-size: 13px; color: var(--mute); line-height: 1.4; }
-.item.now { border-color: var(--ink); }
-.item.done { opacity: .55; }
-.item .btn { font-size: 14px; padding: 9px 10px; margin-top: 6px; }
-/* 작은 창(PIP) 모드 */
-.pip-btn { font-size: 13px; padding: 7px 12px; }
-.mini-hud { display: none; }
-.popped {
-  flex: 1 1 auto; min-height: 300px; display: grid; place-content: center; gap: 12px; text-align: center;
-  color: var(--mute); font-size: 15px; background: var(--sky);
-}
-.popped[hidden] { display: none !important; }
-.pip body { display: block; }
-.pip .scene { position: fixed; inset: 0; min-height: 0; }
-.pip .mini-hud {
-  display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
-  position: absolute; left: 10px; right: 10px; bottom: 8px;
-  font-variant-numeric: tabular-nums; color: var(--ink);
-}
-.pip .mini-hud b { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
-.pip .mini-hud span { font-size: 13px; font-weight: 700; }
-.pip .boat-wrap { width: 92px; top: calc(52% - 56px); }
-.pip .scene { background: linear-gradient(var(--sky) 0 52%, var(--sea) 52% 100%); }
-.pip .waves { top: 52%; }
-.pip .dock { top: calc(52% - 8px); width: 18%; min-width: 60px; height: 12px; }
-.pip .pet-dock { width: 38px; top: calc(52% - 46px); left: 8px; }
-.pip .dock-sign, .pip .horizon-label { display: none; }
-.pip .bubble { font-size: 12px; padding: 6px 10px; max-width: 190px; border-radius: 10px; bottom: calc(100% + 6px); }
-.item .tag { font-size: 12px; font-weight: 700; color: var(--accent); }
+.buy.owned { background: var(--soft); color: var(--ink); }
+.buy:disabled { opacity: .35; cursor: default; }
+.state { font-size: 12px; font-weight: 700; color: var(--accent); white-space: nowrap; }
 
-/* 장면 */
-.scene {
-  position: relative; flex: 1 1 auto; min-height: 300px; overflow: hidden;
-  background: linear-gradient(var(--sky) 0 58%, var(--sea) 58% 100%);
-}
-.horizon-label {
-  position: absolute; right: max(20px, env(safe-area-inset-right, 0px)); top: calc(58% - 26px);
-  font-size: 12px; color: var(--mute); letter-spacing: .08em;
-}
-.waves { position: absolute; left: 0; right: 0; top: 58%; bottom: 0; }
-.wave {
-  position: absolute; left: -50%; width: 200%; height: 14px; opacity: .5;
-  background: radial-gradient(circle at 10px -4px, transparent 12px, var(--sea-deep) 13px) 0 0 / 20px 14px repeat-x;
-  animation: drift 9s linear infinite;
-}
-.wave:nth-child(1) { top: 18%; }
-.wave:nth-child(2) { top: 48%; animation-duration: 13s; animation-direction: reverse; opacity: .35; }
-.wave:nth-child(3) { top: 78%; animation-duration: 7s; }
-@keyframes drift { to { transform: translateX(20%); } }
+.popped { width: 100%; max-width: 360px; background: var(--card); border-radius: 22px; padding: 28px 16px; text-align: center; color: var(--mute); font-size: 14px; display: grid; gap: 12px; box-sizing: border-box; }
+.popped .btn { width: auto; justify-self: center; }
 
-.dock {
-  position: absolute; left: 0; top: calc(58% - 10px); width: 13%; min-width: 92px; height: 18px;
-  background: var(--dock); border-radius: 0 3px 3px 0;
-}
-.dock::before, .dock::after {
-  content: ""; position: absolute; top: 18px; width: 8px; height: 60px; background: var(--dock); opacity: .8;
-}
-.dock::before { left: 18%; } .dock::after { left: 70%; }
-.dock-sign {
-  position: absolute; left: max(12px, env(safe-area-inset-left, 0px)); top: calc(58% - 96px);
-  font-size: 11px; font-weight: 700; color: var(--ink); background: var(--card);
-  border: 1px solid var(--line); padding: 4px 8px; border-radius: 4px; white-space: nowrap;
-}
-
-.boat-wrap {
-  position: absolute; top: calc(58% - 92px); left: 0; width: 150px;
-  transform: translateX(var(--x, 60px));
-}
-.boat-wrap svg { width: 100%; height: auto; display: block; }
-@media (max-width: 520px) { .boat-wrap { width: 112px; top: calc(58% - 70px); } }
-.boat-wrap.returning-home { transition: transform 1.2s ease-out; }
-[data-lv] { display: none; }
-.lv-1 [data-lv~="1"], .lv-2 [data-lv~="2"], .lv-3 [data-lv~="3"], .lv-4 [data-lv~="4"] { display: inline; }
-.boat-bob { animation: bob 2.6s ease-in-out infinite; transform-origin: 50% 80%; }
-@keyframes bob { 0%,100% { transform: translateY(0) rotate(-1.5deg); } 50% { transform: translateY(5px) rotate(1.5deg); } }
-.boat-wrap.facing-left .flip { transform: scaleX(-1); }
-.flip { transition: transform .5s; }
-
-/* 부두 위 캐릭터 */
-.pet-dock {
-  position: absolute; width: 58px; top: calc(58% - 66px);
-  left: max(18px, calc(env(safe-area-inset-left, 0px) + 18px));
-  transition: transform .7s cubic-bezier(.3,1.6,.5,1), opacity .2s .6s;
-}
-.pet-dock.hop { transform: translate(70px, -10px); opacity: 0; }
-.pet-in-boat { opacity: 0; transition: opacity .2s; }
-.boarded .pet-in-boat { opacity: 1; }
-
-.bubble {
-  position: absolute; bottom: calc(100% + 10px); left: 30px; width: max-content; max-width: min(260px, 70vw);
-  background: var(--card); color: var(--ink); border: 1px solid var(--line);
-  border-radius: 14px; padding: 10px 14px; font-size: 15px; line-height: 1.45; font-weight: 600;
-  box-shadow: 0 6px 18px rgba(30,40,50,.08);
-  transition: opacity .3s;
-}
-.bubble::after {
-  content: ""; position: absolute; left: var(--tail, 26px); top: 100%; border: 8px solid transparent; border-top-color: var(--card);
-}
-.bubble.fade { opacity: 0; }
-
-/* 패널 */
-.panel {
-  flex: 0 0 auto; border-top: 1px solid var(--line); background: var(--bg);
-  padding-block: 20px calc(22px + env(safe-area-inset-bottom, 0px));
-  padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px));
-}
-.inner { max-width: 640px; margin: 0 auto; display: grid; gap: 14px; }
-.label { font-size: 13px; color: var(--mute); }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip {
-  font: inherit; font-size: 15px; font-weight: 600; color: var(--ink);
-  background: var(--card); border: 1px solid var(--line); border-radius: 999px;
-  padding: 9px 16px; cursor: pointer;
-}
-.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.chip:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.custom { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; color: var(--mute); }
-.custom input {
-  width: 64px; font: inherit; font-size: 15px; font-weight: 600; color: var(--ink); text-align: center;
-  background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 8px 6px;
-}
-.row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; justify-content: space-between; }
-.btn {
-  font: inherit; font-weight: 700; font-size: 16px; cursor: pointer;
-  background: var(--accent); color: #fff; border: 0; border-radius: 12px; padding: 13px 22px;
-}
-:root[data-theme="dark"] .btn { color: #16202a; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn { color: #16202a; } }
-.btn.ghost { background: transparent; color: var(--mute); border: 1px solid var(--line); font-size: 13px; padding: 9px 14px; font-weight: 600; }
-.timer { font-size: clamp(44px, 9vw, 64px); font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1; }
-.status { font-size: 15px; color: var(--mute); }
-.track { position: relative; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
-.track i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--accent); border-radius: 3px; }
-.result-title { font-size: 22px; font-weight: 800; }
-.fish { font-size: 15px; color: var(--ink); }
-@media (prefers-reduced-motion: reduce) { .wave, .boat-bob { animation: none; } .boat-wrap { transition: none; } }
+/* 작은 창(PIP) 안 */
+.pip body { padding: 0; display: block; background: var(--card); }
+.pip .widget { max-width: none; border-radius: 0; box-shadow: none; min-height: 100vh; }
+.pip .scene { height: 170px; }
+.pip .body { padding: 10px 12px 12px; gap: 10px; }
+.pip .timer { font-size: 36px; }
+.pip .pip-hide { display: none !important; }
+@media (prefers-reduced-motion: reduce) { .bounce { animation: none; } }
 </style>
 </head>
 <body>
 
-<header>
-  <span class="brand">EMPTY CHAIR</span>
-  <span class="head-right">
-    <span class="sub">집중 원양어선</span>
-    <button class="btn ghost pip-btn" id="pipBtn" hidden>작은 창으로 띄우기</button>
+<div class="top"><span class="brand">EMPTY CHAIR</span><span class="app-name">집중 원양어선</span></div>
+
+<div class="widget" id="widget">
+  <div class="scene" id="scene">
+    <canvas id="sea"></canvas>
+    <svg class="dock-pet" id="dockPet" viewBox="0 0 60 64" aria-hidden="true"></svg>
+    <div class="boat" id="boat"><svg viewBox="0 0 240 132" id="boatSvg" aria-label="펫이 탄 고기잡이 배"></svg></div>
+    <div class="bubble" id="bubble"></div>
     <span class="wallet" id="wallet" title="모은 물고기">
-      <svg viewBox="0 0 22 14" aria-hidden="true"><path d="M2 7 Q8 0 15 7 Q8 14 2 7 Z" fill="var(--accent)"/><path d="M14 7 L21 2 V12 Z" fill="var(--accent)"/><circle cx="6" cy="6" r="1.2" fill="var(--card)"/></svg>
+      <svg viewBox="0 0 22 14" aria-hidden="true"><path d="M2 7 Q8 0 15 7 Q8 14 2 7 Z" fill="#2f5574"/><path d="M14 7 L21 2 V12 Z" fill="#2f5574"/><circle cx="6" cy="6" r="1.2" fill="#fff"/></svg>
       <span id="walletNum">0</span>
     </span>
-  </span>
-</header>
+  </div>
 
-<div class="scene" id="scene">
-  <div class="waves"><div class="wave"></div><div class="wave"></div><div class="wave"></div></div>
-  <span class="horizon-label">먼 바다</span>
-  <div class="dock"></div>
-  <div class="mini-hud"><b id="miniTimer">대기 중</b><span id="miniFish"></span></div>
-  <span class="dock-sign">밀양행 원양어선 출항장</span>
+  <div class="body">
+    <!-- 1. 출항 전 -->
+    <div class="step" id="stepPick">
+      <div class="pets" id="pets"></div>
+      <div class="chips" id="chips">
+        <button class="chip" data-min="15" aria-pressed="false">15분</button>
+        <button class="chip" data-min="25" aria-pressed="true">25분</button>
+        <button class="chip" data-min="50" aria-pressed="false">50분</button>
+        <button class="chip" data-min="90" aria-pressed="false">90분</button>
+        <label class="custom"><input id="customMin" type="number" min="1" max="300" placeholder="직접" inputmode="numeric" aria-label="직접 입력(분)"></label>
+      </div>
+      <button class="btn" id="go">25분 출항시키기</button>
+      <div class="links">
+        <button class="link" id="openShop">상점</button>
+        <span class="status" id="pickHint"></span>
+        <button class="link pip-hide" id="pipBtn" hidden>작은 창으로 띄우기</button>
+      </div>
+    </div>
 
-  <!-- 부두 위에 서 있는 펫 -->
-  <svg class="pet-dock" id="petDock" viewBox="0 0 60 64" aria-hidden="true">
-    <ellipse cx="30" cy="42" rx="22" ry="19" fill="#fbfaf7" stroke="#2b2f33" stroke-width="2"/>
-    <path d="M10 26 Q30 2 50 26 Z" fill="#f2c94c" stroke="#2b2f33" stroke-width="2" stroke-linejoin="round"/>
-    <path d="M5 27 H55" stroke="#2b2f33" stroke-width="2.4" stroke-linecap="round"/>
-    <circle cx="22" cy="40" r="2.4" fill="#2b2f33"/><circle cx="38" cy="40" r="2.4" fill="#2b2f33"/>
-    <ellipse cx="17" cy="46" rx="3.5" ry="2" fill="#f4b6b0"/><ellipse cx="43" cy="46" rx="3.5" ry="2" fill="#f4b6b0"/>
-    <path d="M27 46 Q30 49 33 46" fill="none" stroke="#2b2f33" stroke-width="1.8" stroke-linecap="round"/>
-    <ellipse cx="22" cy="61" rx="5" ry="2.5" fill="#2b2f33"/><ellipse cx="38" cy="61" rx="5" ry="2.5" fill="#2b2f33"/>
-  </svg>
+    <!-- 2. 항해 중 -->
+    <div class="step" id="stepSail" hidden>
+      <div class="timer-row">
+        <div><div class="timer" id="timer">25:00</div><div class="status" id="sailStatus">먼 바다로 나가는 중</div></div>
+        <div class="fish" id="fishNow">물고기 0마리</div>
+      </div>
+      <div class="track"><i id="bar"></i></div>
+      <div class="links">
+        <button class="link" id="quit">일찍 돌아오기</button>
+        <button class="link" id="ff" hidden>시안용 빨리감기</button>
+      </div>
+    </div>
 
-  <div class="boat-wrap" id="boat">
-    <div class="bubble" id="bubble">나 진짜 떠난다?<br>집중할 수 있지?</div>
-    <div class="boat-bob"><div class="flip">
-      <svg viewBox="0 0 150 100" aria-label="펫이 탄 고기잡이 배" id="boatSvg" class="lv-1">
-        <!-- 돛대와 깃발 -->
-        <path d="M98 6 V58" stroke="#6b4329" stroke-width="3"/>
-        <path d="M98 8 L122 15 L98 22 Z" fill="#3d5a73"/>
-        <path data-lv="4" d="M98 24 L116 29 L98 34 Z" fill="#f2c94c"/>
-        <!-- Lv2+ 조타실과 연기 -->
-        <g data-lv="2 3 4">
-          <rect x="104" y="36" width="28" height="24" rx="3" fill="#f7f1e8" stroke="#6b4329" stroke-width="2"/>
-          <rect x="110" y="41" width="9" height="8" rx="1.5" fill="#c9d3db" stroke="#6b4329" stroke-width="1.5"/>
-          <rect x="124" y="26" width="6" height="10" fill="#6b4329"/>
-          <circle cx="130" cy="18" r="4" fill="#c9d3db" opacity=".8"/><circle cx="136" cy="10" r="3" fill="#c9d3db" opacity=".6"/>
-        </g>
-        <!-- Lv3+ 그물과 집어등 -->
-        <g data-lv="3 4">
-          <path d="M98 30 L12 58" stroke="#7c848b" stroke-width="1.2" stroke-dasharray="3 3"/>
-          <circle cx="30" cy="52" r="2.6" fill="#f2c94c"/><circle cx="52" cy="45" r="2.6" fill="#f2c94c"/><circle cx="74" cy="38" r="2.6" fill="#f2c94c"/>
-        </g>
-        <!-- 펫 (배 안) -->
-        <g class="pet-in-boat" transform="translate(34 18)">
-          <ellipse cx="30" cy="42" rx="22" ry="19" fill="#fbfaf7" stroke="#2b2f33" stroke-width="2"/>
-          <path d="M10 26 Q30 2 50 26 Z" fill="#f2c94c" stroke="#2b2f33" stroke-width="2" stroke-linejoin="round"/>
-          <path d="M5 27 H55" stroke="#2b2f33" stroke-width="2.4" stroke-linecap="round"/>
-          <circle cx="22" cy="40" r="2.4" fill="#2b2f33"/><circle cx="38" cy="40" r="2.4" fill="#2b2f33"/>
-          <ellipse cx="17" cy="46" rx="3.5" ry="2" fill="#f4b6b0"/><ellipse cx="43" cy="46" rx="3.5" ry="2" fill="#f4b6b0"/>
-          <path d="M27 46 Q30 49 33 46" fill="none" stroke="#2b2f33" stroke-width="1.8" stroke-linecap="round"/>
-        </g>
-        <!-- 선체 -->
-        <path id="hull" d="M8 60 H142 L126 90 H26 Z" fill="#8a5a3b" stroke="#6b4329" stroke-width="2" stroke-linejoin="round"/>
-        <path d="M14 68 H137" stroke="#6b4329" stroke-width="2"/>
-        <path data-lv="4" d="M18 74 H133" stroke="#f7f1e8" stroke-width="2"/>
-        <circle cx="40" cy="80" r="4" fill="#eceef0" stroke="#6b4329" stroke-width="2"/>
-        <text id="boatName" x="86" y="85" font-size="10" font-weight="800" fill="#f7f1e8" text-anchor="middle" font-family="Pretendard Variable, sans-serif">나룻배</text>
-      </svg>
-    </div></div>
+    <!-- 2-1. 일찍 돌아오기 확인 -->
+    <div class="step" id="stepQuit" hidden>
+      <div><div class="title">정말 배를 돌릴까요?</div><div class="sub">지금 돌아오면 그물 속 물고기의 절반만 가져와요.</div></div>
+      <div class="btn-row"><button class="btn ghost" id="quitYes">돌아오기</button><button class="btn" id="quitNo">계속 집중</button></div>
+    </div>
+
+    <!-- 3. 귀항 -->
+    <div class="step" id="stepDone" hidden>
+      <div><div class="title" id="doneTitle"></div><div class="sub" id="doneText"></div></div>
+      <div class="btn-row"><button class="btn ghost" id="doneShop">상점</button><button class="btn" id="again">다시 출항</button></div>
+    </div>
+
+    <!-- 상점 -->
+    <div class="step" id="stepShop" hidden>
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" data-tab="crew" aria-selected="true">항해원</button>
+        <button class="tab" role="tab" data-tab="flag" aria-selected="false">깃발</button>
+        <button class="tab" role="tab" data-tab="outfit" aria-selected="false">옷</button>
+      </div>
+      <div class="shop" id="shopList"></div>
+      <div class="links">
+        <button class="link" id="closeShop">돌아가기</button>
+        <button class="link" id="demoFish" hidden>시안용 물고기 +30</button>
+      </div>
+    </div>
   </div>
 </div>
 
 <div class="popped" id="popped" hidden>
-  <div>펫이 작은 창으로 나가서 화면 위에 떠 있어요.<br>다른 탭에서 공부해도 계속 보여요.</div>
-  <div><button class="btn ghost" id="pipBack">다시 데려오기</button></div>
+  <div>위젯이 작은 창으로 나가서 화면 위에 떠 있어요.<br>다른 탭에서 공부해도 계속 보여요.</div>
+  <button class="btn ghost" id="pipBack">다시 데려오기</button>
 </div>
 
-<div class="panel">
-  <!-- 1. 출항 전 -->
-  <div class="inner" id="stepPick">
-    <div class="label">어선에 몇 분 동안 태울까요? 이 시간이 끝나야 돌아올 수 있어요.</div>
-    <div class="chips" id="chips">
-      <button class="chip" data-min="15" aria-pressed="false">15분</button>
-      <button class="chip" data-min="25" aria-pressed="true">25분</button>
-      <button class="chip" data-min="50" aria-pressed="false">50분</button>
-      <button class="chip" data-min="90" aria-pressed="false">90분</button>
-      <label class="custom">직접 <input id="customMin" type="number" min="1" max="300" placeholder="40" inputmode="numeric"> 분</label>
-    </div>
-    <div class="row">
-      <span class="status" id="pickHint">25분 뒤에 돌아와요</span>
-      <span class="chips">
-        <button class="btn ghost" id="openShop">배 업그레이드</button>
-        <button class="btn" id="go">출항시키기</button>
-      </span>
-    </div>
-  </div>
-
-  <!-- 상점 -->
-  <div class="inner" id="stepShop" hidden>
-    <div class="row">
-      <span class="label">모은 물고기로 배를 바꾸면 더 빨리 잡아와요.</span>
-      <span class="chips">
-        <button class="btn ghost" id="demoFish" hidden>시안용 물고기 +20</button>
-        <button class="btn ghost" id="closeShop">돌아가기</button>
-      </span>
-    </div>
-    <div class="shop" id="shop"></div>
-  </div>
-
-  <!-- 2. 항해 중 -->
-  <div class="inner" id="stepSail" hidden>
-    <div class="row">
-      <div>
-        <div class="timer" id="timer">25:00</div>
-        <div class="status" id="sailStatus">부두를 떠나는 중</div>
-      </div>
-      <div class="fish" id="fishNow">잡은 물고기 0마리</div>
-    </div>
-    <div class="track"><i id="bar"></i></div>
-    <div class="row">
-      <span class="label">배는 시간이 끝나기 전엔 돌아오지 않아요.</span>
-      <button class="btn ghost" id="ff" hidden>시안용 빨리감기</button>
-    </div>
-  </div>
-
-  <!-- 3. 귀항 -->
-  <div class="inner" id="stepDone" hidden>
-    <div class="result-title" id="doneTitle">무사히 돌아왔어!</div>
-    <div class="fish" id="doneText"></div>
-    <div class="row">
-      <button class="btn ghost" id="doneShop">배 업그레이드</button>
-      <button class="btn" id="again">다시 출항하기</button>
-    </div>
-  </div>
-</div>
+<p class="note" id="note">크롬이나 엣지에서 "작은 창으로 띄우기"를 누르면 다른 탭이나 프로그램 위에도 떠 있어요.</p>
 
 <script>
 (() => {
   const cache = {};
-  const $ = (id) => cache[id] || (cache[id] = document.getElementById(id)); // 장면이 작은 창으로 옮겨가도 찾을 수 있게 캐시
-  document.querySelectorAll('[id]').forEach((el) => { cache[el.id] = el; });
-  const scene = $('scene'), boat = $('boat'), bubble = $('bubble'), petDock = $('petDock');
-  const KEY = 'focusBoat.v1', BANK = 'focusBoat.bank.v1';
-  let minutes = 25, endAt = 0, startAt = 0, speed = 1, raf = 0, lastLine = '';
-  let simNow = 0, lastReal = 0, tripLevel = 1, pipWin = null, rafWin = window;
-  const stopLoop = () => { try { rafWin.cancelAnimationFrame(raf); } catch (e) {} };
+  const $ = (id) => cache[id] || (cache[id] = document.getElementById(id));
+  document.querySelectorAll('[id]').forEach((el) => { cache[el.id] = el; }); // 장면이 작은 창으로 옮겨가도 찾을 수 있게
 
-  const save = (v) => { try { v ? localStorage.setItem(KEY, JSON.stringify(v)) : localStorage.removeItem(KEY); } catch (e) {} };
-  const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } };
+  const OL = '#4a3328';
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-  // 배 단계: every = 몇 분마다 한 마리, cost = 이 배로 바꾸는 데 드는 물고기
-  const BOATS = [
-    { lv: 1, name: '나룻배', every: 5, cost: 0, hull: '#8a5a3b', desc: '5분마다 1마리' },
-    { lv: 2, name: '통통배', every: 4, cost: 15, hull: '#8a5a3b', desc: '조타실이 생겨요. 4분마다 1마리' },
-    { lv: 3, name: '고깃배', every: 3, cost: 40, hull: '#5f7a64', desc: '그물과 집어등. 3분마다 1마리' },
-    { lv: 4, name: '원양어선', every: 2, cost: 100, hull: '#34506a', desc: '먼 바다 전문. 2분마다 1마리' },
-  ];
-  let bank = { fish: 0, level: 1 };
+  /* ---------- 펫 ---------- */
+  const PETS = {
+    mong: { name: '몽글', kind: '아기 물범', desc: '겁 많고 잘 우는데 끝까지 버텨요', headTop: 14, neck: 46 },
+    dal:  { name: '달달', kind: '해달', desc: '시끄럽고 신나는 분위기 메이커', headTop: 15, neck: 47 },
+    moon: { name: '문문', kind: '문어', desc: '시크하고 어른스러운 잔소리꾼', headTop: 8, neck: 40 },
+  };
+  const ORDER = ['mong', 'dal', 'moon'];
+
+  const fishSvg = (x, y, s = 1, c = '#8fb3c9', flip = false) =>
+    `<g transform="translate(${x} ${y}) scale(${flip ? -s : s} ${s})"><path d="M-6 0 Q0 -5 6 0 Q0 5 -6 0Z" fill="${c}" stroke="${OL}" stroke-width="1.1"/><path d="M6 0 L10.5 -3.8 L10.5 3.8Z" fill="${c}" stroke="${OL}" stroke-width="1.1" stroke-linejoin="round"/><circle cx="-3" cy="-0.8" r="0.9" fill="${OL}"/></g>`;
+  const blush = (x, y) => `<ellipse cx="${x + 3}" cy="${y}" rx="4.2" ry="2.4" fill="#f6b3b5" opacity=".7"/><path d="M${x} ${y + 1} l1.6 -2.2 M${x + 2.6} ${y + 1.2} l1.6 -2.2 M${x + 5.2} ${y + 1.4} l1.6 -2.2" stroke="#e98b92" stroke-width="1.1" stroke-linecap="round"/>`;
+  const dotEyes = (y = 35) => `<circle cx="22" cy="${y}" r="2.7" fill="${OL}"/><circle cx="38" cy="${y}" r="2.7" fill="${OL}"/><circle cx="22.9" cy="${y - 0.9}" r=".9" fill="#fff"/><circle cx="38.9" cy="${y - 0.9}" r=".9" fill="#fff"/>`;
+
+  function outfitSvg(id, item) {
+    const p = PETS[id];
+    if (item === 'scarf') return `<path d="M11 ${p.neck} Q30 ${p.neck + 7} 49 ${p.neck} L49 ${p.neck + 5} Q30 ${p.neck + 12} 11 ${p.neck + 5}Z" fill="#d9574f" stroke="${OL}" stroke-width="1.8"/><path d="M39 ${p.neck + 6} l3 10 l5 -1.5 l-2 -9" fill="#d9574f" stroke="${OL}" stroke-width="1.8" stroke-linejoin="round"/>`;
+    const t = p.headTop;
+    if (item === 'rain') return `<g transform="translate(0 ${t - 15})"><path d="M14 19 Q30 -3 46 19Z" fill="#f2c94c" stroke="${OL}" stroke-width="2"/><path d="M6 18 Q30 27 54 18 Q30 22 6 18Z" fill="#f2c94c" stroke="${OL}" stroke-width="2" stroke-linejoin="round"/></g>`;
+    if (item === 'captain') return `<g transform="translate(0 ${t - 13})"><path d="M15 17 Q15 3 30 3 Q45 3 45 17Z" fill="#fbfbfb" stroke="${OL}" stroke-width="2"/><rect x="12" y="15" width="36" height="5.5" rx="2.5" fill="#2f4a63" stroke="${OL}" stroke-width="1.6"/><path d="M30 7 v6 M27.5 11.5 q2.5 2.5 5 0" stroke="#d4a82a" stroke-width="1.6" fill="none" stroke-linecap="round"/></g>`;
+    if (item === 'beanie') return `<g transform="translate(0 ${t - 12})"><path d="M14 18 Q14 2 30 2 Q46 2 46 18Z" fill="#6f93b0" stroke="${OL}" stroke-width="2"/><rect x="12" y="14" width="36" height="6" rx="3" fill="#a9c1d3" stroke="${OL}" stroke-width="1.6"/><circle cx="30" cy="1" r="4" fill="#f3f5f7" stroke="${OL}" stroke-width="1.6"/></g>`;
+    return '';
+  }
+
+  // pose: idle | sign(귀항 시그니처) | sad
+  function petSvg(id, pose = 'idle', outfit = null, n = 0) {
+    let s = '';
+    const face = pose === 'sign' || pose === 'catch';
+    const col = { mong: '#e9eef2', dal: '#b98c63', moon: '#f0a092' }[id];
+    if (pose === 'catch') s += `<path d="M11 42 Q3 22 11 3 Q17 1 18 6 Q13 24 17 38Z" fill="${col}" stroke="${OL}" stroke-width="2"/><path d="M49 42 Q57 22 49 3 Q43 1 42 6 Q47 24 43 38Z" fill="${col}" stroke="${OL}" stroke-width="2"/>`;
+    const body = 'M8 46 C6 26 16 14 30 14 C44 14 54 26 52 46 C51 58 42 62 30 62 C18 62 9 58 8 46Z';
+    if (id === 'mong') {
+      const c = '#e9eef2';
+      if (pose === 'sign') s += `<path d="M12 40 Q2 30 6 23 Q13 26 16 36" fill="${c}" stroke="${OL}" stroke-width="2"/><path d="M48 40 Q58 30 54 23 Q47 26 44 36" fill="${c}" stroke="${OL}" stroke-width="2"/>`;
+      s += `<path d="${body}" fill="${c}" stroke="${OL}" stroke-width="2.2"/><ellipse cx="18" cy="26" rx="2" ry="1.4" fill="#c9d3db"/><ellipse cx="44" cy="52" rx="2.4" ry="1.6" fill="#c9d3db"/><ellipse cx="40" cy="22" rx="1.4" ry="1" fill="#c9d3db"/>`;
+      if (face) {
+        s += `<circle cx="22" cy="35" r="3.6" fill="${OL}"/><circle cx="38" cy="35" r="3.6" fill="${OL}"/><circle cx="23.2" cy="33.7" r="1.3" fill="#fff"/><circle cx="39.2" cy="33.7" r="1.3" fill="#fff"/><circle cx="21" cy="36.5" r=".6" fill="#fff"/><circle cx="37" cy="36.5" r=".6" fill="#fff"/>`;
+        s += `<path d="M18 39 q-1.5 4 0 6 q1.5 -2 0 -6Z M42 39 q-1.5 4 0 6 q1.5 -2 0 -6Z" fill="#8fc3e6"/>`;
+        s += `<path d="M26 43 Q30 48 34 43" fill="#e98b92" stroke="${OL}" stroke-width="1.6"/>`;
+      } else if (pose === 'sad') {
+        s += `<path d="M19 33 l6 2 M41 33 l-6 2" stroke="${OL}" stroke-width="1.6" stroke-linecap="round"/>` + dotEyes(37) + `<path d="M27 45 Q30 43 33 45" fill="none" stroke="${OL}" stroke-width="1.6" stroke-linecap="round"/>`;
+      } else {
+        s += dotEyes(35) + `<path d="M26.5 43.5 Q28.3 45.8 30 43.5 Q31.7 45.8 33.5 43.5" fill="none" stroke="${OL}" stroke-width="1.6" stroke-linecap="round"/>`;
+      }
+      s += `<ellipse cx="30" cy="40.6" rx="2.2" ry="1.5" fill="${OL}"/>` + blush(13, 42) + blush(41, 42);
+      if (!face) s += `<path d="M10 48 Q2 52 5 58 Q11 57 14 52" fill="${c}" stroke="${OL}" stroke-width="2"/><path d="M50 48 Q58 52 55 58 Q49 57 46 52" fill="${c}" stroke="${OL}" stroke-width="2"/>`;
+      else if (pose === 'sign') s += fishSvg(30, 55, 1.15, '#e9a46a');
+    }
+    if (id === 'dal') {
+      const c = '#b98c63', f = '#f4e3ca';
+      if (pose === 'sign') s += `<path d="M13 40 Q4 26 9 16 Q15 18 18 34" fill="${c}" stroke="${OL}" stroke-width="2"/><path d="M47 40 Q56 26 51 16 Q45 18 42 34" fill="${c}" stroke="${OL}" stroke-width="2"/>` + fishSvg(30, 8, 1.3, '#8fb3c9');
+      s += `<circle cx="15" cy="21" r="4.6" fill="${c}" stroke="${OL}" stroke-width="2"/><circle cx="45" cy="21" r="4.6" fill="${c}" stroke="${OL}" stroke-width="2"/><circle cx="15" cy="21" r="2" fill="#8e6646"/><circle cx="45" cy="21" r="2" fill="#8e6646"/>`;
+      s += `<path d="${body}" fill="${c}" stroke="${OL}" stroke-width="2.2"/><ellipse cx="30" cy="40" rx="15" ry="11" fill="${f}"/>`;
+      if (face) s += `<path d="M19 32 l4 3 l-4 3 M41 32 l-4 3 l4 3" fill="none" stroke="${OL}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M25.5 42.5 Q30 49 34.5 42.5Z" fill="#e98b92" stroke="${OL}" stroke-width="1.5"/>`;
+      else if (pose === 'sad') s += dotEyes(36) + `<path d="M27 45.5 Q30 43.5 33 45.5" fill="none" stroke="${OL}" stroke-width="1.6" stroke-linecap="round"/>`;
+      else s += dotEyes(34.5) + `<path d="M30 41.5 v1.5 M26.8 43.6 Q28.4 45.6 30 43 Q31.6 45.6 33.2 43.6" fill="none" stroke="${OL}" stroke-width="1.6" stroke-linecap="round"/>`;
+      s += `<path d="M27.2 38 h5.6 q-.8 3 -2.8 3 q-2 0 -2.8 -3Z" fill="${OL}"/>` + blush(13, 42) + blush(41, 42);
+      s += `<circle cx="16" cy="44" r=".7" fill="${OL}"/><circle cx="44" cy="44" r=".7" fill="${OL}"/>`;
+      if (!face) s += `<ellipse cx="30" cy="54" rx="5" ry="3.4" fill="#e7d3e0" stroke="${OL}" stroke-width="1.5"/><path d="M27 54 h6 M28 52.5 h4" stroke="${OL}" stroke-width=".8"/><circle cx="23" cy="53" r="3.6" fill="${c}" stroke="${OL}" stroke-width="1.8"/><circle cx="37" cy="53" r="3.6" fill="${c}" stroke="${OL}" stroke-width="1.8"/>`;
+    }
+    if (id === 'moon') {
+      const c = '#f0a092';
+      if (pose === 'sign') s += fishSvg(5, 34, 1, '#8fb3c9', true) + fishSvg(55, 34, 1, '#e9a46a');
+      s += `<path d="M10 40 Q9 54 6 58 Q12 61 15 54 Q18 62 23 56 Q26 62 30 57 Q34 62 37 56 Q42 62 45 54 Q48 61 54 58 Q51 54 50 40 Z" fill="${c}" stroke="${OL}" stroke-width="2" stroke-linejoin="round"/>`;
+      if (pose === 'sign') s += `<path d="M11 42 Q4 38 6 33 M49 42 Q56 38 54 33" fill="none" stroke="${OL}" stroke-width="2"/>`;
+      s += `<path d="M9 42 C7 18 18 7 30 7 C42 7 53 18 51 42 Q30 48 9 42Z" fill="${c}" stroke="${OL}" stroke-width="2.2"/><circle cx="20" cy="17" r="1.6" fill="#f7c3b8"/><circle cx="24" cy="13" r="1" fill="#f7c3b8"/>`;
+      if (face) s += `<rect x="16" y="26" width="11" height="7" rx="2.5" fill="${OL}"/><rect x="33" y="26" width="11" height="7" rx="2.5" fill="${OL}"/><path d="M27 28.5 h6" stroke="${OL}" stroke-width="1.6"/><path d="M18 27.5 l3 0" stroke="#fff" stroke-width="1" opacity=".7"/><path d="M27 37 Q31 39.5 34 36" fill="none" stroke="${OL}" stroke-width="1.6" stroke-linecap="round"/>`;
+      else if (pose === 'sad') s += `<path d="M18 30 h7 M35 30 h7" stroke="${OL}" stroke-width="2" stroke-linecap="round"/><path d="M28 38 h4" stroke="${OL}" stroke-width="1.6" stroke-linecap="round"/>`;
+      else s += `<path d="M18 29.5 h7.5 M34.5 29.5 h7.5" stroke="${OL}" stroke-width="2" stroke-linecap="round"/><path d="M19 29.5 a2.9 2.9 0 0 0 5.8 0Z M35.2 29.5 a2.9 2.9 0 0 0 5.8 0Z" fill="${OL}"/><ellipse cx="30" cy="37" rx="1.8" ry="1.4" fill="none" stroke="${OL}" stroke-width="1.5"/>`;
+      s += blush(13, 35) + blush(41, 35);
+    }
+    if (outfit) s += outfitSvg(id, outfit);
+    if (pose === 'catch') { // 물고기 담긴 그물을 머리 위로 번쩍
+      const colors = ['#8fb3c9', '#e9a46a', '#a9bfcc', '#d98c7a', '#9fc4b1'], k = Math.min(n, 12);
+      let f = '';
+      for (let i = 0; i < k; i++) { const r = Math.floor(i / 4), c = i % 4; f += fishSvg(16 + c * 9.5 + (r % 2) * 3, -1 - r * 7.5, .8, colors[(i * 7) % 5], i % 2 === 0); }
+      s += `<g>${f}<path d="M8 -26 Q3 8 30 10 Q57 8 52 -26 Q30 -32 8 -26Z" fill="url(#netp)" stroke="#6d5a48" stroke-width="1.8"/><path d="M8 -26 Q30 -32 52 -26" stroke="#6d5a48" stroke-width="2.6" fill="none"/></g>`;
+      s += `<circle cx="12" cy="1" r="4.6" fill="${col}" stroke="${OL}" stroke-width="2"/><circle cx="48" cy="1" r="4.6" fill="${col}" stroke="${OL}" stroke-width="2"/>`;
+    }
+    return s;
+  }
+
+  /* ---------- 성격별 멘트 ---------- */
+  const LINES = {
+    mong: {
+      hello: '나... 나 진짜 떠난다?<br>너 집중할 수 있지? 꼭이야...',
+      short: '15분이면... 금방이지?<br>다행이다 흐엥', mid: '우리 둘 다 할 수 있어...<br>나 무서워도 참을게', long: '그렇게 오래?! 흐엥...<br>그래도 너 믿을게',
+      streak: (n) => `오늘 벌써 ${n}번째야...<br>너 진짜 열심히 한다`,
+      early: ['부두가 멀어진다... 흐엥', '너도 지금 공부 시작했지?<br>나도 안 울고 버틸게'],
+      far: ['여기 너무 멀어...<br>근데 반 왔대!', '파도가 커...<br>그래도 그물 던졌어!'],
+      back: ['이제 집에 간다...<br>조금만 더 힘내', '물고기 무거워...<br>근데 좋아'],
+      near: ['부두 보여!<br>거의 다 왔어!'],
+      quit: '벌써...?<br>나 아직 바다 한가운데인데...',
+      done: (n) => `흐어엉 해냈어!<br>물고기 <b>${n}마리</b>야. 너 정말 대단해`,
+      giveup: (n) => `괜찮아... ${n}마리라도 잡았어.<br>다음엔 끝까지 같이 가자`,
+    },
+    dal: {
+      hello: '출항이다아! 나 진짜 떠난다?<br>집중할 수 있지?!',
+      short: '에이 너무 짧아!<br>그래도 출발!', mid: '딱 좋아!<br>가자가자!', long: '우와 대항해다!<br>너 완전 멋있다!',
+      streak: (n) => `오늘 ${n}번째 출항!<br>불붙었다 불붙었어!`,
+      early: ['바람 좋다!<br>너도 속도 내!', '물고기들아 기다려라!'],
+      far: ['제일 먼 바다 도착!<br>절반 왔다!', '그물 던진다! 영차!'],
+      back: ['귀항 시작!<br>막판 스퍼트!', '그물 꽉 찼다!<br>아직 더 들어간다!'],
+      near: ['보인다 보여!<br>다 왔다!'],
+      quit: '엥?! 벌써 돌아가자고?<br>아직 잡을 거 많은데!',
+      done: (n) => `우하하! 대풍어다!<br>물고기 <b>${n}마리</b>!! 너 최고야!`,
+      giveup: (n) => `아쉽다! ${n}마리뿐이야.<br>다음엔 끝까지 가는 거다!`,
+    },
+    moon: {
+      hello: '나 진짜 떠난다.<br>집중할 수 있지? 딴생각하면 다 보인다.',
+      short: '짧군.<br>워밍업으로 인정한다.', mid: '적당하다.<br>시작하지.', long: '오래 가는군.<br>각오는 됐겠지.',
+      streak: (n) => `오늘 ${n}번째.<br>꾸준함은 재능이다.`,
+      early: ['출항 완료.<br>휴대폰은 내려놓도록.', '바다는 조용하다.<br>너도 조용히.'],
+      far: ['반환점이다.<br>집중력 떨어질 시간이지.', '여기까지 왔으면<br>돌아가는 것도 할 수 있다.'],
+      back: ['돌아가는 중.<br>끝까지 흐트러지지 마라.', '나쁘지 않은 페이스다.'],
+      near: ['곧 입항이다.<br>마무리 정리하도록.'],
+      quit: '포기하는 건가.<br>선택은 너의 몫이다.',
+      done: (n) => `<b>${n}마리</b>.<br>훌륭한 집중이었다. 인정한다.`,
+      giveup: (n) => `${n}마리.<br>다음엔 끝까지 버텨라.`,
+    },
+  };
+
+  /* ---------- 상점 ---------- */
+  const FLAGS = {
+    basic: { name: '기본 삼각기', cost: 0 },
+    stripe: { name: '줄무늬 깃발', cost: 10 },
+    fish: { name: '물고기 깃발', cost: 15 },
+    star: { name: '별 깃발', cost: 20 },
+    chair: { name: 'EMPTY CHAIR 깃발', cost: 30 },
+  };
+  const OUTFITS = {
+    rain: { name: '노란 비옷 모자', cost: 15 },
+    captain: { name: '선장 모자', cost: 25 },
+    beanie: { name: '뱃사람 털모자', cost: 20 },
+    scarf: { name: '빨간 목도리', cost: 15 },
+  };
+  const CREW_COST = [30, 70];
+  const BASE_EVERY = 4; // 기본: 4분마다 1마리
+
+  function flagSvg(id) {
+    if (id === 'stripe') return `<rect x="0" y="0" width="26" height="16" fill="#fff"/><rect x="0" y="0" width="26" height="4" fill="#d9574f"/><rect x="0" y="8" width="26" height="4" fill="#d9574f"/><rect x="0" y="0" width="26" height="16" fill="none" stroke="${OL}" stroke-width="1.2"/>`;
+    if (id === 'fish') return `<rect x="0" y="0" width="26" height="16" fill="#9cc1db" stroke="${OL}" stroke-width="1.2"/>` + fishSvg(12, 8, .9, '#fff');
+    if (id === 'star') return `<rect x="0" y="0" width="26" height="16" fill="#2f4a63" stroke="${OL}" stroke-width="1.2"/><path d="M13 3 l1.5 3.3 3.6.4 -2.7 2.4 .8 3.5 -3.2 -1.8 -3.2 1.8 .8 -3.5 -2.7 -2.4 3.6 -.4Z" fill="#f2c94c"/>`;
+    if (id === 'chair') return `<rect x="0" y="0" width="28" height="17" fill="#fff" stroke="${OL}" stroke-width="1.2"/><path d="M11 3 v10 M11 9 h7 v4 M18 9 v-1" stroke="${OL}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
+    return `<path d="M0 0 L24 7 L0 14Z" fill="#2f5574" stroke="${OL}" stroke-width="1"/>`;
+  }
+
+  /* ---------- 저장 ---------- */
+  const KEY = 'focusBoat.trip.v2', BANK = 'focusBoat.bank.v2';
+  let bank = { fish: 0, captain: 'mong', crew: 0, flags: ['basic'], flag: 'basic', outfits: [], wear: {}, today: '', todayCount: 0 };
   try { bank = Object.assign(bank, JSON.parse(localStorage.getItem(BANK) || '{}')); } catch (e) {}
   const saveBank = () => { try { localStorage.setItem(BANK, JSON.stringify(bank)); } catch (e) {} };
-  const boatOf = (lv) => BOATS[lv - 1];
+  const saveTrip = (v) => { try { v ? localStorage.setItem(KEY, JSON.stringify(v)) : localStorage.removeItem(KEY); } catch (e) {} };
+  const loadTrip = () => { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } };
+  const todayStr = () => new Date().toDateString();
+  const crewOf = (cap) => ORDER.filter((x) => x !== cap).slice(0, bank.crew);
+  const rate = () => 1 + 0.5 * bank.crew;
 
-  function renderBank(pop) {
-    $('walletNum').textContent = bank.fish;
-    if (pop) { $('wallet').classList.remove('pop'); void $('wallet').offsetWidth; $('wallet').classList.add('pop'); }
-    const b = boatOf(bank.level);
-    $('boatSvg').setAttribute('class', 'lv-' + b.lv);
-    $('hull').setAttribute('fill', b.hull);
-    $('boatName').textContent = b.name;
-    $('shop').innerHTML = BOATS.map((x) => {
-      const state = x.lv < bank.level ? 'done' : x.lv === bank.level ? 'now' : '';
-      const btn = x.lv === bank.level + 1
-        ? `<button class="btn" data-buy="${x.lv}" ${bank.fish < x.cost ? 'disabled style="opacity:.45;cursor:default"' : ''}>물고기 ${x.cost}마리로 바꾸기</button>`
-        : '';
-      const tag = x.lv === bank.level ? '<span class="tag">지금 타는 배</span>' : x.lv < bank.level ? '<span class="tag">지나온 배</span>' : `<span class="tag">물고기 ${x.cost}마리</span>`;
-      return `<div class="item ${state}">${tag}<b>Lv.${x.lv} ${x.name}</b><span>${x.desc}</span>${btn}</div>`;
-    }).join('');
+  /* ---------- 상태 ---------- */
+  // mode: dock(부두 위) | sail | quit(확인 중) | returning(일찍 귀항 중) | home(돌아와서 포즈)
+  let mode = 'dock', minutes = 25, startAt = 0, endAt = 0, speed = 1, simNow = 0, lastReal = 0;
+  let tripCrew = 0, caught = 0, homeAnim = null, gaveUpLast = false, pipWin = null, rafWin = window, raf = 0, lastLine = '';
+  let boatFlipped = false, progress = 0, geo = {};
+  const scene = $('scene'), canvas = $('sea'), boat = $('boat'), boatSvg = $('boatSvg'), bubble = $('bubble'), dockPet = $('dockPet');
+
+  /* ---------- 배 그리기 ---------- */
+  function renderBoat() {
+    const cap = bank.captain, boarded = mode !== 'dock';
+    const pose = mode === 'home' ? (gaveUpLast ? 'sad' : 'sign') : 'idle';
+    const anim = pose === 'sign' ? ' class="bounce"' : '';
+    const crew = crewOf(cap);
+    const F = boatFlipped ? ' transform="translate(240 0) scale(-1 1)"' : '';
+    let s = `<defs><pattern id="netp" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0 H5 M0 0 V5" stroke="${OL}" stroke-width=".7" opacity=".55"/></pattern>
+      <linearGradient id="hullG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbfaf7"/><stop offset="1" stop-color="#e3e1db"/></linearGradient>
+      <linearGradient id="cabG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e9e7e1"/></linearGradient></defs>`;
+    s += `<g${F}>`;
+    // 선미 붐(그물 거는 기둥)
+    s += `<path d="M34 90 L24 38 M24 38 L6 44" stroke="#5b6670" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M44 90 L24 38" stroke="#5b6670" stroke-width="2" fill="none"/>`;
+    // 돛대, 레이더, 깃발
+    s += `<path d="M112 40 V6" stroke="#5b6670" stroke-width="2.6"/><path d="M104 16 H120" stroke="#5b6670" stroke-width="2"/><rect x="106" y="20" width="12" height="3" rx="1.5" fill="#5b6670"/>`;
+    s += `<g transform="translate(113 4)">${flagSvg(bank.flag)}</g>`;
+    // 줄과 그물
+    if (mode === 'home') {
+      s += `<path d="M6 44 Q4 60 10 70" stroke="#6d5a48" stroke-width="1.4" fill="none"/>`;
+    } else if (mode === 'sail' || mode === 'quit' || mode === 'returning') {
+      s += `<path d="M6 44 Q0 90 -12 128" stroke="#6d5a48" stroke-width="1.4" fill="none" stroke-dasharray="4 2"/>`;
+    }
+    // 조타실
+    s += `<rect x="62" y="44" width="58" height="44" rx="3" fill="url(#cabG)" stroke="#3b4954" stroke-width="1.6"/><rect x="58" y="38" width="66" height="8" rx="2" fill="#2f5574" stroke="#3b4954" stroke-width="1.4"/>`;
+    s += `<rect x="68" y="52" width="12" height="10" rx="1.5" fill="#9db7c9" stroke="#3b4954" stroke-width="1.2"/><rect x="85" y="52" width="12" height="10" rx="1.5" fill="#9db7c9" stroke="#3b4954" stroke-width="1.2"/><rect x="102" y="52" width="12" height="10" rx="1.5" fill="#9db7c9" stroke="#3b4954" stroke-width="1.2"/>`;
+    s += `<path d="M69 54 l4 -2 M86 54 l4 -2 M103 54 l4 -2" stroke="#fff" stroke-width="1" opacity=".8"/>`;
+    s += `<circle cx="78" cy="76" r="6.5" fill="none" stroke="#e7774f" stroke-width="3.5"/><circle cx="78" cy="76" r="6.5" fill="none" stroke="#fff" stroke-width="3.5" stroke-dasharray="3.4 3.4"/>`;
+    // 2번째 항해원은 조타실 지붕 위, 1번째는 뱃머리, 선장은 가운데 앞
+    if (boarded && crew[1]) s += `<g transform="translate(66 -8) scale(.72)"><g${anim}>${petSvg(crew[1], pose, bank.wear[crew[1]])}</g></g>`;
+    if (boarded && crew[0]) s += `<g transform="translate(178 40) scale(.72)"><g${anim}>${petSvg(crew[0], pose, bank.wear[crew[0]])}</g></g>`;
+    const capPose = pose === 'sign' && caught > 0 ? 'catch' : pose;
+    const capT = capPose === 'catch' ? 'translate(124 25) scale(1)' : 'translate(132 37) scale(.8)';
+    if (boarded) s += `<g transform="${capT}"><g${anim}>${petSvg(cap, capPose, bank.wear[cap], caught)}</g></g>`;
+    // 선체
+    s += `<path d="M12 90 L228 82 Q224 108 204 128 L42 128 Q22 116 12 90Z" fill="#2f5574" stroke="#24384a" stroke-width="1.6" stroke-linejoin="round"/>`;
+    s += `<path d="M12 90 L228 82 Q226 96 220 106 L22 112 Q15 102 12 90Z" fill="url(#hullG)" stroke="#3b4954" stroke-width="1.4" stroke-linejoin="round"/>`;
+    s += `<path d="M18 104 L222 97" stroke="#c84f45" stroke-width="3"/>`;
+    s += `<path d="M14 84 L226 76" stroke="#5b6670" stroke-width="1.6"/>` + [30, 56, 128, 158, 188, 214].map((x) => `<path d="M${x} ${(84 - (x - 14) * 0.038).toFixed(1)} v6" stroke="#5b6670" stroke-width="1.3"/>`).join('');
+    s += `<circle cx="200" cy="92" r="3" fill="#cfd8de" stroke="#3b4954" stroke-width="1.2"/>`;
+    s += `</g>`;
+    s += `<text x="${boatFlipped ? 92 : 148}" y="99" font-size="9" font-weight="800" fill="#2f5574" text-anchor="middle" font-family="Pretendard Variable, sans-serif" letter-spacing=".5">EMPTY CHAIR 1호</text>`;
+    // 흘수선 물거품
+    s += `<path d="M30 128 q10 -4 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0" fill="none" stroke="#fff" stroke-width="2.4" opacity=".7" stroke-linecap="round"/>`;
+    boatSvg.innerHTML = s;
+    dockPet.innerHTML = petSvg(cap, 'idle', bank.wear[cap]);
+    dockPet.style.display = boarded ? 'none' : '';
   }
-  $('shop').addEventListener('click', (e) => {
-    const lv = +e.target.dataset.buy; if (!lv) return;
-    const x = boatOf(lv); if (bank.fish < x.cost) return;
-    bank.fish -= x.cost; bank.level = lv; saveBank(); renderBank(true);
-    say(`우와, ${x.name}이다!<br>이제 ${x.every}분마다 한 마리씩 잡아올게.`);
-  });
-  $('openShop').addEventListener('click', () => {
-    $('stepPick').hidden = true; $('stepShop').hidden = false;
-    const next = BOATS[bank.level];
-    say(next ? `${next.name} 갖고 싶다...<br>물고기 ${next.cost}마리면 돼!` : '최고의 배야.<br>이제 바다는 내 거야!');
-  });
-  $('closeShop').addEventListener('click', () => { $('stepShop').hidden = true; $('stepPick').hidden = false; say('나 진짜 떠난다?<br>집중할 수 있지?'); });
-  $('demoFish').addEventListener('click', () => { bank.fish += 20; saveBank(); renderBank(true); });
 
-  function say(text, align) {
+  /* ---------- 바다 그리기 (canvas) ---------- */
+  const clouds = [0.12, 0.38, 0.7, 0.9].map((x, i) => ({ x, y: 0.1 + (i % 2) * 0.09, s: 0.7 + (i % 3) * 0.25, v: 0.004 + i * 0.0015 }));
+  const islands = [[0.05, 0.22, 10], [0.2, 0.12, 6], [0.8, 0.18, 8], [0.93, 0.1, 5]];
+
+  function layout() {
+    const W = scene.clientWidth, H = scene.clientHeight;
+    const small = !!pipWin || W < 520;
+    const hz = H * (small ? 0.38 : 0.4);
+    const nearY = hz + (H - hz) * (small ? 0.62 : 0.58);
+    const pierW = clamp(W * 0.17, small ? 54 : 90, 210);
+    const bw = clamp(W * (small ? 0.44 : 0.3), 120, 340);
+    const s0 = bw / 240;
+    geo = { W, H, hz, nearY, pierW, s0, deckY: nearY - 34 * s0, small };
+  }
+
+  function drawSea(t) {
+    const { W, H, hz, nearY, pierW, deckY, s0 } = geo;
+    const win = scene.ownerDocument.defaultView, dpr = win.devicePixelRatio || 1;
+    if (canvas.width !== Math.round(W * dpr) || canvas.height !== Math.round(H * dpr)) { canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr); }
+    const g = canvas.getContext('2d');
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // 하늘
+    let gr = g.createLinearGradient(0, 0, 0, hz);
+    gr.addColorStop(0, '#c4d3df'); gr.addColorStop(1, '#eef1f2');
+    g.fillStyle = gr; g.fillRect(0, 0, W, hz + 1);
+    const sunX = W * 0.74, sunY = hz * 0.42;
+    gr = g.createRadialGradient(sunX, sunY, 0, sunX, sunY, hz * 0.9);
+    gr.addColorStop(0, 'rgba(255,250,235,.95)'); gr.addColorStop(0.08, 'rgba(255,248,230,.7)'); gr.addColorStop(1, 'rgba(255,248,230,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, W, hz);
+    // 구름
+    g.fillStyle = 'rgba(255,255,255,.75)';
+    clouds.forEach((c) => {
+      const x = (((c.x + t * c.v * 0.02) % 1.2) - 0.1) * W, y = c.y * hz * 2, r = 16 * c.s * (geo.small ? 0.6 : 1);
+      g.beginPath(); g.ellipse(x, y, r * 2.4, r * 0.8, 0, 0, 7); g.ellipse(x - r * 0.8, y - r * 0.5, r, r * 0.8, 0, 0, 7); g.ellipse(x + r * 0.5, y - r * 0.7, r * 1.2, r, 0, 0, 7); g.fill();
+    });
+    // 먼 섬
+    g.fillStyle = '#9fb0bd';
+    islands.forEach(([x, w, h]) => {
+      const cx = x * W, ww = w * W * 0.5, hh = h * (geo.small ? 0.5 : 1);
+      g.beginPath(); g.moveTo(cx - ww, hz); g.quadraticCurveTo(cx - ww * 0.3, hz - hh * 1.6, cx, hz - hh); g.quadraticCurveTo(cx + ww * 0.4, hz - hh * 0.4, cx + ww, hz); g.fill();
+    });
+    // 바다
+    gr = g.createLinearGradient(0, hz, 0, H);
+    gr.addColorStop(0, '#a9bccb'); gr.addColorStop(0.25, '#7f9bb1'); gr.addColorStop(1, '#4b6c86');
+    g.fillStyle = gr; g.fillRect(0, hz, W, H - hz);
+    g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(0, hz, W, 1);
+    // 햇빛 반짝임
+    for (let i = 0; i < 26; i++) {
+      const yy = hz + 3 + Math.pow(i / 26, 1.6) * (H - hz) * 0.7;
+      const spread = 8 + (yy - hz) * 0.5;
+      const xx = sunX + Math.sin(i * 12.9 + t * 1.3) * spread;
+      const a = 0.12 + 0.3 * Math.max(0, Math.sin(t * 2.2 + i * 1.7));
+      g.fillStyle = `rgba(255,252,240,${a})`;
+      g.fillRect(xx, yy, 6 + (yy - hz) * 0.08, 1.4);
+    }
+    // 원근감 있는 물결 (멀수록 촘촘하고 작게)
+    const rows = 22;
+    for (let i = 0; i < rows; i++) {
+      const d = i / rows, y0 = hz + Math.pow(d, 1.9) * (H - hz) + 2;
+      const amp = 0.4 + d * 4.5, len = 18 + d * 90, sp = 0.6 + d * 0.8;
+      g.lineWidth = 0.6 + d * 1.6;
+      g.strokeStyle = `rgba(255,255,255,${0.10 + d * 0.22})`;
+      g.beginPath();
+      let pen = false;
+      for (let x = -20; x < W + 20; x += 5) {
+        const a = x / len * 6.28 + t * sp + i * 1.9;
+        const y = y0 + (Math.sin(a) + 0.45 * Math.sin(a * 2.3 + i * 4.1 - t * 0.4)) * amp;
+        const crest = Math.sin(x / (len * 2.7) + i * 2.3 + t * 0.15) + 0.4 * Math.sin(x / (len * 0.9) - i);
+        if (crest > -0.2) { pen ? g.lineTo(x, y) : g.moveTo(x, y); pen = true; } else pen = false;
+      }
+      g.stroke();
+      g.strokeStyle = `rgba(35,60,85,${0.05 + d * 0.12})`;
+      g.beginPath();
+      for (let x = -20; x < W + 20; x += 6) {
+        const a = x / len * 6.28 + t * sp + i * 1.9 + 1.2;
+        const y = y0 + amp * 1.6 + (Math.sin(a) + 0.45 * Math.sin(a * 2.3 + i * 4.1 - t * 0.4)) * amp;
+        x === -20 ? g.moveTo(x, y) : g.lineTo(x, y);
+      }
+      g.stroke();
+    }
+    // 부두
+    const plank = Math.max(6, 11 * s0);
+    g.fillStyle = '#6b5644';
+    for (let px = 10; px < pierW - 4; px += pierW / 3) g.fillRect(px, deckY + plank, 6 * s0 + 3, H - deckY);
+    g.fillStyle = 'rgba(75,108,134,.55)'; g.fillRect(0, nearY + 6, pierW, H - nearY);
+    g.fillStyle = '#a38667'; g.fillRect(0, deckY, pierW, plank);
+    g.fillStyle = '#8a6e52'; g.fillRect(0, deckY + plank - 2, pierW, 2);
+    g.strokeStyle = 'rgba(80,60,40,.45)'; g.lineWidth = 1;
+    for (let px = 8; px < pierW; px += 14) { g.beginPath(); g.moveTo(px, deckY); g.lineTo(px, deckY + plank - 2); g.stroke(); }
+    g.fillStyle = '#3f4a52'; g.fillRect(pierW - 14 * s0 - 4, deckY - 8 * s0, 8 * s0 + 2, 8 * s0);
+    g.strokeStyle = 'rgba(255,255,255,.35)'; g.lineWidth = 1.6;
+    g.beginPath();
+    for (let x = 0; x < pierW + 10; x += 5) { const y = nearY + 8 + Math.sin(x / 14 + t * 1.4) * 2; x === 0 ? g.moveTo(x, y) : g.lineTo(x, y); }
+    g.stroke();
+  }
+
+  /* ---------- 배와 말풍선 위치 ---------- */
+  function boatPose(t) {
+    const { W, hz, nearY, pierW, s0 } = geo;
+    let q = Math.sin(Math.PI * clamp(progress, 0, 1));
+    if (homeAnim) { // 일찍 돌아올 때: 지금 위치에서 부두로 빠르게
+      const k = clamp((performance.now() - homeAnim.t0) / 2200, 0, 1);
+      q = homeAnim.q * Math.pow(1 - k, 3);
+      if (k >= 1 && homeAnim.cb) { const cb = homeAnim.cb; homeAnim = null; cb(); q = 0; }
+    }
+    const x0 = pierW - 30 * s0, x1 = W * 0.6;
+    const wl0 = nearY, wl1 = hz + 10;
+    const e = Math.pow(q, 0.8);
+    const s = lerp(s0, s0 * 0.32, e), x = lerp(x0, x1, q), wl = lerp(wl0, wl1, e);
+    const bob = Math.sin(t * 1.7) * 2.6 * s / s0, rot = Math.sin(t * 1.25) * 1.8;
+    return { x, y: wl - 128 * s + bob, s, rot };
+  }
+
+  function frame() {
+    const t = performance.now() / 1000;
+    if (mode === 'sail' || mode === 'quit') sailTick();
+    layout();
+    drawSea(t);
+    const p = boatPose(t);
+    boat.style.transform = `translate(${p.x}px, ${p.y}px) scale(${p.s}) translate(120px, 128px) rotate(${p.rot}deg) translate(-120px, -128px)`;
+    const ds = geo.s0 * 1.05;
+    dockPet.style.transform = `translate(${geo.pierW * 0.42 - 30 * ds}px, ${geo.deckY - 62 * ds}px) scale(${ds})`;
+    // 말풍선 기준점: 선장 머리 위
+    let ax, ay;
+    if (mode === 'dock') { ax = geo.pierW * 0.42; ay = geo.deckY - 56 * ds; }
+    else { const bx = boatFlipped ? 240 - 154 : 154; ax = p.x + bx * p.s; ay = p.y + (mode === 'home' && !gaveUpLast && caught > 0 ? -6 : 44) * p.s; }
+    const bw = bubble.offsetWidth, bh = bubble.offsetHeight;
+    const left = clamp(ax - 30, 8, geo.W - bw - 8), top = Math.max(6, ay - bh - 12);
+    bubble.style.transform = `translate(${left}px, ${top}px)`;
+    bubble.style.setProperty('--tail', clamp(ax - left - 8, 12, bw - 26) + 'px');
+    rafWin = pipWin || window;
+    raf = rafWin.requestAnimationFrame(frame);
+  }
+
+  function say(html) {
     bubble.classList.add('fade');
-    setTimeout(() => {
-      bubble.innerHTML = text;
-      bubble.classList.remove('fade');
-      fitBubble();
-    }, 250);
+    setTimeout(() => { bubble.innerHTML = html; bubble.classList.remove('fade'); }, 220);
   }
 
-  // 배 위치: 0 → 1 → 0 (먼 바다 갔다가 돌아옴)
-  function homeX() { return Math.max(pipWin ? 50 : 84, scene.clientWidth * 0.08); }
-  function farX() { return scene.clientWidth - boat.offsetWidth - 20; }
-  function place(p) {
-    const x = homeX() + (farX() - homeX()) * Math.sin(Math.PI * p);
-    boat.style.setProperty('--x', x + 'px');
-    boat.classList.toggle('facing-left', p > 0.5);
-    fitBubble(x);
-  }
-  // 말풍선이 화면 밖으로 나가지 않게 위치 조정
-  function fitBubble(x) {
-    if (x === undefined) { const m = /([\d.]+)px/.exec(boat.style.getPropertyValue('--x')); x = m ? +m[1] : homeX(); }
-    const W = scene.clientWidth, bw = bubble.offsetWidth, petCenter = x + boat.offsetWidth * 0.4;
-    let left = petCenter - 34;
-    left = Math.min(left, W - bw - 12); left = Math.max(left, 12);
-    bubble.style.left = (left - x) + 'px';
-    bubble.style.setProperty('--tail', Math.min(bw - 30, Math.max(14, petCenter - left - 8)) + 'px');
+  /* ---------- 지갑 ---------- */
+  function renderWallet(pop) {
+    $('walletNum').textContent = bank.fish;
+    if (pop) { const w = $('wallet'); w.classList.remove('pop'); void w.offsetWidth; w.classList.add('pop'); }
   }
 
-  // 시안 단계 1: 시간 고르기
+  /* ---------- 1단계: 선장, 시간 ---------- */
+  function renderPets() {
+    const c = PETS[bank.captain];
+    $('pets').innerHTML = ORDER.map((id) => `<button class="pet-card" data-pet="${id}" aria-pressed="${id === bank.captain}" aria-label="${PETS[id].name}"><svg viewBox="0 2 60 62">${petSvg(id, 'idle', bank.wear[id])}</svg></button>`).join('') +
+      `<div class="pet-info"><b>${c.name}</b><span>${c.kind}, ${c.desc}</span></div>`;
+  }
+  $('pets').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-pet]'); if (!b) return;
+    bank.captain = b.dataset.pet; saveBank();
+    renderPets(); renderBoat(); updateHint();
+    say(LINES[bank.captain].hello);
+  });
   const chips = [...document.querySelectorAll('.chip')];
-  function setMinutes(m) {
-    minutes = m;
-    $('pickHint').textContent = `${m}분 뒤에 돌아와요`;
+  function updateHint() {
+    const crew = crewOf(bank.captain).map((x) => PETS[x].name);
+    $('pickHint').textContent = `예상 물고기 ${Math.floor(minutes / BASE_EVERY * rate())}마리` + (crew.length ? `, 항해원 ${crew.length}명` : '');
+    $('go').textContent = `${minutes}분 출항시키기`;
   }
+  const lenLine = (m) => LINES[bank.captain][m <= 15 ? 'short' : m <= 50 ? 'mid' : 'long'];
   chips.forEach((c) => c.addEventListener('click', () => {
     chips.forEach((o) => o.setAttribute('aria-pressed', String(o === c)));
-    $('customMin').value = '';
-    setMinutes(+c.dataset.min);
-    const lines = {
-      15: '15분? 금방 다녀올게.<br>그 사이 딴짓하면 안 돼!',
-      25: '25분이면 딱 좋아.<br>나 진짜 떠난다?',
-      50: '50분이나?<br>나 멀리 가는 거야... 버틸 수 있지?',
-      90: '90분이면 원양 어업이야.<br>도시락 챙겨야겠다.',
-    };
-    say(lines[c.dataset.min]);
+    $('customMin').value = ''; minutes = +c.dataset.min; updateHint(); say(lenLine(minutes));
   }));
   $('customMin').addEventListener('input', (e) => {
     const v = Math.round(+e.target.value);
-    if (v >= 1 && v <= 300) {
-      chips.forEach((o) => o.setAttribute('aria-pressed', 'false'));
-      setMinutes(v);
-    }
+    if (v >= 1 && v <= 300) { chips.forEach((o) => o.setAttribute('aria-pressed', 'false')); minutes = v; updateHint(); }
   });
+  $('customMin').addEventListener('change', () => say(lenLine(minutes)));
 
-  // 출항
+  function show(step) {
+    ['stepPick', 'stepSail', 'stepQuit', 'stepDone', 'stepShop'].forEach((s) => { $(s).hidden = s !== step; });
+  }
+
+  /* ---------- 출항 ---------- */
   $('go').addEventListener('click', () => {
-    say('좋아, 출발!<br>시간 다 될 때까지 못 돌아와.');
-    petDock.classList.add('hop');
-    setTimeout(() => {
-      boat.classList.add('boarded');
-      startAt = Date.now(); endAt = startAt + minutes * 60000;
-      tripLevel = bank.level;
-      save({ startAt, endAt, minutes, level: tripLevel });
-      startSail();
-    }, 800);
+    if (bank.today !== todayStr()) { bank.today = todayStr(); bank.todayCount = 0; }
+    startAt = Date.now(); endAt = startAt + minutes * 60000; tripCrew = bank.crew;
+    saveTrip({ startAt, endAt, minutes, crew: tripCrew });
+    beginSail();
+    const n = bank.todayCount + 1;
+    say(n >= 2 ? LINES[bank.captain].streak(n) : '좋아, 출발!<br>시간 다 될 때까지 못 돌아와.');
   });
 
-  function startSail() {
-    boat.classList.remove('returning-home');
-    $('stepPick').hidden = true; $('stepShop').hidden = true; $('stepSail').hidden = false; $('stepDone').hidden = true;
-    petDock.classList.add('hop'); boat.classList.add('boarded');
-    speed = 1; $('ff').textContent = '시안용 빨리감기';
-    simNow = Date.now(); lastReal = performance.now();
-    requestWakeLock();
-    stopLoop(); tick();
+  function beginSail() {
+    mode = 'sail'; homeAnim = null; boatFlipped = false; caught = 0; lastLine = ''; progress = 0;
+    speed = 1; simNow = Date.now(); lastReal = performance.now(); $('ff').textContent = '시안용 빨리감기';
+    renderBoat(); show('stepSail'); requestWakeLock();
   }
 
   const fmt = (ms) => {
-    const s = Math.max(0, Math.ceil(ms / 1000));
-    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60;
+    const s = Math.max(0, Math.ceil(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60;
     return (h ? h + ':' + String(m).padStart(2, '0') : String(m).padStart(2, '0')) + ':' + String(r).padStart(2, '0');
   };
-  const fishAt = (elapsedMs) => Math.floor(elapsedMs / (boatOf(tripLevel).every * 60000)); // 배 단계마다 속도 다름
+  const fishAt = (ms) => Math.floor(ms / (BASE_EVERY * 60000) * (1 + 0.5 * tripCrew));
 
-  function lineFor(p) {
-    if (p < 0.12) return ['부두가 점점 멀어진다...<br>이제 진짜 못 돌아가!', 'left'];
-    if (p < 0.3) return ['물고기 잡는 중.<br>너는 공부 잡는 중이지?', 'left'];
-    if (p < 0.45) return ['파도가 세다.<br>너도 휴대폰 보지 말고 버텨!', 'left'];
-    if (p < 0.55) return ['여기가 제일 먼 바다야.<br>딱 절반 왔어!', 'right'];
-    if (p < 0.75) return ['이제 돌아가는 중!<br>조금만 더 집중해줘.', 'right'];
-    if (p < 0.92) return ['부두가 보인다!<br>마지막까지 힘내.', 'left'];
-    return ['거의 다 왔어!<br>정리할 준비해.', 'left'];
+  function phaseLine(p) {
+    const L = LINES[bank.captain];
+    if (p < 0.08) return null;
+    if (p < 0.4) return ['early', L.early];
+    if (p < 0.6) return ['far', L.far];
+    if (p < 0.88) return ['back', L.back];
+    return ['near', L.near];
   }
 
-  function tick() {
+  function sailTick() {
     const realNow = performance.now();
     simNow += (realNow - lastReal) * speed; lastReal = realNow;
     if (speed === 1) simNow = Math.max(simNow, Date.now());
-    const total = endAt - startAt, elapsed = Math.min(total, simNow - startAt), p = elapsed / total;
-    place(p);
+    const total = endAt - startAt, elapsed = clamp(simNow - startAt, 0, total);
+    progress = elapsed / total;
+    const flip = progress > 0.5, n = fishAt(elapsed);
+    if (flip !== boatFlipped || n !== caught) { boatFlipped = flip; caught = n; renderBoat(); }
     $('timer').textContent = fmt(endAt - simNow);
-    $('bar').style.width = (p * 100) + '%';
-    $('sailStatus').textContent = p < 0.5 ? '먼 바다로 나가는 중' : '부두로 돌아오는 중';
-    $('fishNow').textContent = `잡은 물고기 ${fishAt(elapsed)}마리`;
-    $('miniTimer').textContent = fmt(endAt - simNow); $('miniFish').textContent = `물고기 ${fishAt(elapsed)}마리`;
-    const [line, align] = lineFor(p);
-    if (line !== lastLine) { lastLine = line; say(line, align); }
-    if (p >= 1) return arrive(total);
-    rafWin = pipWin || window; raf = rafWin.requestAnimationFrame(tick);
+    $('bar').style.width = (progress * 100) + '%';
+    $('sailStatus').textContent = progress < 0.5 ? '먼 바다로 나가는 중' : '부두로 돌아오는 중';
+    $('fishNow').textContent = `물고기 ${n}마리`;
+    const ph = mode === 'sail' && phaseLine(progress);
+    if (ph && ph[0] !== lastLine) { lastLine = ph[0]; say(pick(ph[1])); }
+    if (progress >= 1) arrive(false);
   }
 
   $('ff').addEventListener('click', () => {
-    speed = speed === 1 ? 120 : 1;
+    speed = speed === 1 ? 150 : 1;
     if (speed === 1) simNow = Date.now();
     $('ff').textContent = speed === 1 ? '시안용 빨리감기' : '원래 속도로';
   });
 
-  function arrive(total) {
-    save(null); releaseWakeLock();
-    boat.classList.add('returning-home'); place(0);
-    const n = Math.max(1, fishAt(total));
-    bank.fish += n; saveBank(); renderBank(true);
-    $('miniTimer').textContent = '도착!'; $('miniFish').textContent = `물고기 +${n}`;
-    lastLine = '';
-    say(`다녀왔어! 물고기 ${n}마리 잡았어.<br>너도 진짜 집중했구나.`);
-    $('stepSail').hidden = true; $('stepDone').hidden = false;
-    $('doneTitle').textContent = `${Math.round(total / 60000)}분 항해 끝, 무사히 돌아왔어!`;
-    const next = BOATS[bank.level];
-    $('doneText').textContent = `물고기 ${n}마리가 지갑에 들어왔어요. 지금 ${bank.fish}마리` + (next ? `, ${next.name}까지 ${Math.max(0, next.cost - bank.fish)}마리 남았어요.` : '.');
+  // 일찍 돌아오기
+  $('quit').addEventListener('click', () => { mode = 'quit'; show('stepQuit'); say(LINES[bank.captain].quit); });
+  $('quitNo').addEventListener('click', () => { mode = 'sail'; show('stepSail'); say(pick(LINES[bank.captain].early)); });
+  $('quitYes').addEventListener('click', () => {
+    const half = Math.floor(caught / 2);
+    homeAnim = { t0: performance.now(), q: Math.sin(Math.PI * progress), cb: () => { caught = half; arrive(true); } };
+    progress = 0; mode = 'returning'; boatFlipped = true; renderBoat(); show('stepSail');
+    $('sailStatus').textContent = '부두로 돌아오는 중';
+  });
+
+  function arrive(gaveUp) {
+    saveTrip(null); releaseWakeLock();
+    const total = endAt - startAt;
+    if (!gaveUp) caught = fishAt(total);
+    progress = 0; mode = 'home'; boatFlipped = false; homeAnim = null; gaveUpLast = gaveUp;
+    bank.fish += caught;
+    if (!gaveUp) { if (bank.today !== todayStr()) { bank.today = todayStr(); bank.todayCount = 0; } bank.todayCount++; }
+    saveBank(); renderWallet(true); renderBoat();
+    const L = LINES[bank.captain];
+    lastLine = ''; say(gaveUp ? L.giveup(caught) : L.done(caught));
+    $('doneTitle').textContent = gaveUp ? '일찍 돌아왔어요' : `${Math.round(total / 60000)}분 항해 끝!`;
+    $('doneText').textContent = `물고기 ${caught}마리를 받았어요. 모은 물고기 ${bank.fish}마리` + (!gaveUp && bank.todayCount >= 2 ? `, 오늘 ${bank.todayCount}번째 항해` : '');
+    show('stepDone');
   }
 
-  $('doneShop').addEventListener('click', () => {
-    $('stepDone').hidden = true; boat.classList.remove('boarded'); petDock.classList.remove('hop');
-    $('openShop').click();
-  });
-  $('again').addEventListener('click', () => {
-    $('stepDone').hidden = true; $('stepPick').hidden = false;
-    boat.classList.remove('boarded'); petDock.classList.remove('hop');
-    say('또 가자고?<br>이번엔 몇 분 탈까?');
-  });
+  function backToDock(line) {
+    mode = 'dock'; homeAnim = null; caught = 0; boatFlipped = false; progress = 0;
+    renderBoat(); renderPets(); updateHint(); show('stepPick');
+    if (line) say(line);
+  }
+  $('again').addEventListener('click', () => backToDock(LINES[bank.captain].hello));
 
-
-  // 작은 창(Document Picture-in-Picture): 펫 장면을 항상 위에 떠 있는 창으로 옮김
-  const sceneHome = document.createComment('scene');
-  scene.before(sceneHome);
-  if ('documentPictureInPicture' in window) $('pipBtn').hidden = false;
-  async function openPip() {
-    if (pipWin) { pipWin.focus?.(); return; }
-    try {
-      pipWin = await window.documentPictureInPicture.requestWindow({ width: 340, height: 240 });
-    } catch (e) {
-      pipWin = null;
-      say('여기선 작은 창이 안 열려요.<br>배포된 사이트를 크롬이나 엣지로 열어주세요.');
-      return;
+  /* ---------- 상점 ---------- */
+  let shopTab = 'crew';
+  const buyBtn = (label, attrs, disabled, owned) => `<button class="buy${owned ? ' owned' : ''}" ${attrs} ${disabled ? 'disabled' : ''}>${label}</button>`;
+  const row = (icon, name, desc, right, vb = '0 2 60 62') => `<div class="item"><svg viewBox="${vb}">${icon}</svg><div class="txt"><b>${name}</b>${desc ? `<span>${desc}</span>` : ''}</div>${right}</div>`;
+  function renderShop() {
+    const cap = bank.captain;
+    document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === shopTab)));
+    let h = '';
+    if (shopTab === 'crew') {
+      h = ORDER.filter((x) => x !== cap).map((id, i) => {
+        const hired = i < bank.crew, next = i === bank.crew, cost = CREW_COST[i];
+        return row(petSvg(id, 'idle', bank.wear[id]), `${PETS[id].name} 구인`, '같이 타면 물고기 50% 더',
+          hired ? '<span class="state">승선 중</span>' : next ? buyBtn(`${cost}마리`, `data-crew="${i}"`, bank.fish < cost) : '<span class="state" style="color:var(--mute)">다음 차례</span>');
+      }).join('');
+    } else if (shopTab === 'flag') {
+      h = Object.entries(FLAGS).map(([id, f]) => {
+        const own = bank.flags.includes(id), on = bank.flag === id;
+        return row(flagSvg(id), f.name, '', on ? '<span class="state">달려 있음</span>' : own ? buyBtn('달기', `data-flag="${id}"`, false, true) : buyBtn(`${f.cost}마리`, `data-flag="${id}"`, bank.fish < f.cost), '-4 -6 36 28');
+      }).join('');
+    } else {
+      h = Object.entries(OUTFITS).map(([id, o]) => {
+        const own = bank.outfits.includes(id), on = bank.wear[cap] === id;
+        return row(petSvg(cap, 'idle', id), o.name, on ? `${PETS[cap].name} 착용 중` : '',
+          on ? buyBtn('벗기기', `data-wear="${id}"`, false, true) : own ? buyBtn('입히기', `data-wear="${id}"`, false, true) : buyBtn(`${o.cost}마리`, `data-wear="${id}"`, bank.fish < o.cost), '0 -6 60 70');
+      }).join('');
     }
-    const d = pipWin.document;
-    const fontUrl = new URL('PretendardVariable.woff2', location.href).href;
+    $('shopList').innerHTML = h;
+  }
+  document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => { shopTab = t.dataset.tab; renderShop(); }));
+  $('stepShop').addEventListener('click', (e) => {
+    const b = e.target.closest('.buy'); if (!b || b.disabled) return;
+    const cap = bank.captain;
+    if (b.dataset.crew) {
+      const i = +b.dataset.crew, cost = CREW_COST[i];
+      if (bank.fish < cost) return;
+      bank.fish -= cost; bank.crew = i + 1;
+      const who = PETS[ORDER.filter((x) => x !== cap)[i]].name;
+      say(cap === 'moon' ? `${who}, 합류를 환영한다.<br>짐은 저쪽에.` : cap === 'dal' ? `${who} 왔다아!<br>같이 가자!` : `${who}도 같이 간대...<br>이제 덜 무서워`);
+    } else if (b.dataset.flag) {
+      const id = b.dataset.flag;
+      if (!bank.flags.includes(id)) { if (bank.fish < FLAGS[id].cost) return; bank.fish -= FLAGS[id].cost; bank.flags.push(id); }
+      bank.flag = id; say(`${FLAGS[id].name} 달았다!<br>멋지지?`);
+    } else if (b.dataset.wear) {
+      const id = b.dataset.wear;
+      if (bank.wear[cap] === id) delete bank.wear[cap];
+      else {
+        if (!bank.outfits.includes(id)) { if (bank.fish < OUTFITS[id].cost) return; bank.fish -= OUTFITS[id].cost; bank.outfits.push(id); }
+        bank.wear[cap] = id;
+        say(cap === 'moon' ? '흠.<br>나쁘지 않군.' : cap === 'dal' ? '우와 나 완전 멋있어!' : '어... 어울려...?<br>헤헤');
+      }
+    } else return;
+    saveBank(); renderWallet(true); renderBoat(); renderShop(); renderPets(); updateHint();
+  });
+  function openShop() {
+    mode = 'dock'; caught = 0; homeAnim = null; boatFlipped = false;
+    renderBoat(); renderShop(); show('stepShop');
+    say(bank.captain === 'moon' ? '쇼핑인가.<br>계획적으로 써라.' : bank.captain === 'dal' ? '쇼핑이다!<br>뭐 살까 뭐 살까!' : '뭐 사줄 거야...?');
+  }
+  $('openShop').addEventListener('click', openShop);
+  $('doneShop').addEventListener('click', openShop);
+  $('closeShop').addEventListener('click', () => backToDock(LINES[bank.captain].hello));
+  $('demoFish').addEventListener('click', () => { bank.fish += 30; saveBank(); renderWallet(true); renderShop(); });
+
+  /* ---------- 작은 창 (Document Picture-in-Picture) ---------- */
+  const widget = $('widget'), widgetHome = document.createComment('widget');
+  widget.before(widgetHome);
+  if ('documentPictureInPicture' in window) $('pipBtn').hidden = false; else $('note').hidden = true;
+  function restartLoop() { try { rafWin.cancelAnimationFrame(raf); } catch (e) {} lastReal = performance.now(); frame(); }
+  async function openPip() {
+    if (pipWin) return;
+    try { pipWin = await window.documentPictureInPicture.requestWindow({ width: 340, height: 330 }); }
+    catch (e) { pipWin = null; say('여기선 작은 창이 안 열려요.<br>배포된 사이트를 크롬이나 엣지로 열어주세요.'); return; }
+    const d = pipWin.document, fontUrl = new URL('PretendardVariable.woff2', location.href).href;
     document.querySelectorAll('style').forEach((st) => {
       const c = d.createElement('style');
       c.textContent = st.textContent.replace(/url\("PretendardVariable\.woff2"\)/g, `url("${fontUrl}")`);
       d.head.append(c);
     });
-    d.title = '집중 원양어선';
-    d.documentElement.classList.add('pip');
-    const theme = document.documentElement.getAttribute('data-theme');
-    if (theme) d.documentElement.setAttribute('data-theme', theme);
-    d.body.append(scene);
+    d.title = '집중 원양어선'; d.documentElement.classList.add('pip');
+    d.body.append(widget);
     $('popped').hidden = false; $('pipBtn').textContent = '작은 창 열림';
     pipWin.addEventListener('pagehide', () => {
-      sceneHome.after(scene);
-      $('popped').hidden = true; $('pipBtn').textContent = '작은 창으로 띄우기';
-      pipWin = null; rafWin = window;
-      if (!$('stepSail').hidden) { stopLoop(); lastReal = performance.now(); tick(); }
-      else place(0);
+      widgetHome.after(widget); $('popped').hidden = true; $('pipBtn').textContent = '작은 창으로 띄우기';
+      pipWin = null; restartLoop();
     });
-    if (!$('stepSail').hidden) { stopLoop(); lastReal = performance.now(); tick(); }
-    else { place(0); say('여기서 지켜볼게.<br>출항 버튼 누르면 바로 떠날게!'); }
+    restartLoop();
+    if (mode === 'dock') say(bank.captain === 'moon' ? '여기서 지켜보겠다.' : '여기서 지켜볼게!<br>출항 버튼 눌러줘');
   }
   $('pipBtn').addEventListener('click', openPip);
-  $('pipBack').addEventListener('click', () => { pipWin?.close(); });
+  $('pipBack').addEventListener('click', () => pipWin?.close());
 
-  // 화면 꺼짐 방지 (가능한 경우만)
+  /* ---------- 화면 꺼짐 방지 ---------- */
   let lock = null;
   async function requestWakeLock() { try { lock = await navigator.wakeLock?.request('screen'); } catch (e) {} }
   function releaseWakeLock() { try { lock?.release(); } catch (e) {} lock = null; }
 
-  window.addEventListener('resize', () => { if (!$('stepSail').hidden) return; place(0); });
-
-  // 새로고침해도 항해 이어가기
-  renderBank(false);
-  const saved = load();
-  place(0);
-  if (saved && saved.endAt > Date.now()) {
-    ({ startAt, endAt, minutes } = saved); tripLevel = saved.level || bank.level;
-    startSail();
-  } else if (saved) { save(null); }
+  /* ---------- 시작 ---------- */
+  renderWallet(false); renderPets(); updateHint(); renderBoat();
+  bubble.innerHTML = LINES[bank.captain].hello;
+  const saved = loadTrip();
+  if (saved && saved.endAt > Date.now()) { ({ startAt, endAt, minutes } = saved); tripCrew = saved.crew || 0; beginSail(); }
+  else if (saved) { ({ startAt, endAt, minutes } = saved); tripCrew = saved.crew || 0; arrive(false); }
+  frame();
 })();
 </script>
 </body>
